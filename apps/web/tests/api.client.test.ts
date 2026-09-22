@@ -30,8 +30,10 @@ describe('buildListQuery', () => {
     expect(buildListQuery({ search: '' })).toBe('')
   })
 
-  it('omite a página 1, que é o padrão', () => {
-    expect(buildListQuery({ page: 1 })).toBe('')
+  // A omissão de padrões é responsabilidade de `toSearchParams`, que cuida da
+  // barra de endereços. Aqui a serialização é mecânica: envia o que recebe.
+  it('envia a página informada, inclusive a primeira', () => {
+    expect(buildListQuery({ page: 1 })).toBe('?page=1')
     expect(buildListQuery({ page: 2 })).toBe('?page=2')
   })
 

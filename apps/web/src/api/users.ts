@@ -10,16 +10,19 @@ import type {
 /**
  * Monta a query da listagem.
  *
- * Parâmetros ausentes ou vazios são omitidos em vez de enviados em branco: a
- * API trata `search=` como ausência de filtro, mas enviar chaves vazias
- * poluiria a URL e faria o cache do TanStack Query tratar `?search=` e
- * `?` como consultas diferentes, buscando duas vezes o mesmo resultado.
+ * Serialização mecânica: envia o que recebe, sem conhecer os valores padrão
+ * da API. Quem decide o que aparece na barra de endereços é `toSearchParams`,
+ * em `lib/userFilters.ts` — são responsabilidades diferentes, e misturá-las
+ * criaria duas regras de omissão discordando entre si.
+ *
+ * A única exceção é a busca vazia, omitida porque a API trata `search=` como
+ * ausência de filtro e enviar a chave em branco só polui a requisição.
  */
 export function buildListQuery(params: ListUsersParams): string {
   const query = new URLSearchParams()
 
   if (params.search) query.set('search', params.search)
-  if (params.page !== undefined && params.page > 1) query.set('page', String(params.page))
+  if (params.page !== undefined) query.set('page', String(params.page))
   if (params.perPage !== undefined) query.set('perPage', String(params.perPage))
   if (params.sort !== undefined) query.set('sort', params.sort)
   if (params.order !== undefined) query.set('order', params.order)
