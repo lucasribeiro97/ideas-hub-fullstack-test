@@ -25,8 +25,8 @@ Registradas conforme o enunciado pede em caso de ambiguidade.
 | P3 | "Tratar emails duplicados" não define qual registro vence | Vence a **primeira ocorrência no arquivo**. As duplicatas têm IDs e nomes diferentes entre si, então a escolha precisa ser determinística e documentada. |
 | P4 | Unicidade de email não especifica sensibilidade a caixa | Tratada como **case-insensitive**: `Contato@X.com` e `contato@x.com` são o mesmo usuário. |
 | P5 | "Variação de temperatura ao longo do dia" não define granularidade | Série **horária** do dia corrente, obtida em chamada única à WeatherAPI. |
-| P7 | A busca de cidade da WeatherAPI é aproximada | Verificado contra a API real: `"sao pualo"` devolve "Sao Sao, Chad" e `"12345"` devolve "Schenectady, USA" (interpretado como CEP). O `404` só ocorre quando nada casa. Como não há forma confiável de distinguir acerto de aproximação, a interface **sempre exibe a cidade, região e país resolvidos em destaque**, para que o erro de digitação seja visível a quem consultou. |
 | P6 | Volume esperado da importação não é definido | O padrão importa 500.000 linhas para que a avaliação seja rápida; `--limit=0` processa o arquivo completo. O tempo da carga completa é medido e documentado no README. |
+| P7 | A busca de cidade da WeatherAPI é aproximada | Verificado contra a API real: `"sao pualo"` devolve "Sao Sao, Chad" e `"12345"` devolve "Schenectady, USA" (interpretado como CEP). O `404` só ocorre quando nada casa. Como não há forma confiável de distinguir acerto de aproximação, a interface **sempre exibe a cidade, região e país resolvidos em destaque**, para que o erro de digitação seja visível a quem consultou. |
 
 ## 3. Dataset de origem
 
