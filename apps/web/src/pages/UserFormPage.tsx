@@ -97,7 +97,7 @@ export function UserFormPage({ mode }: UserFormPageProps) {
   }
 
   return (
-    <>
+    <div className="column-narrow">
       <PageHeading
         title={title}
         description={
@@ -121,6 +121,6 @@ export function UserFormPage({ mode }: UserFormPageProps) {
           void navigate(-1)
         }}
       />
-    </>
+    </div>
   )
 }

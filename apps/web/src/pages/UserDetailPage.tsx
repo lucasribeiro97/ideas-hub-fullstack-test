@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { deleteUser, getUser } from '../api/users.ts'
@@ -22,6 +22,24 @@ export function UserDetailPage() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const [isConfirming, setIsConfirming] = useState(false)
+  const deleteButtonRef = useRef<HTMLButtonElement>(null)
+  /*
+   * Distingue "a confirmação fechou porque cancelaram" de "fechou porque a
+   * tela toda foi embora". No primeiro caso o foco volta ao botão de origem;
+   * no segundo não há origem para onde voltar, e a navegação por teclado
+   * recomeçaria do topo se ninguém cuidasse disso.
+   */
+  const wasConfirming = useRef(false)
+
+  useEffect(() => {
+    if (wasConfirming.current && !isConfirming) {
+      // Depois do render que recolocou os botões: o elemento de origem é outro
+      // nó, recriado, então guardar a referência antiga não resolveria.
+      deleteButtonRef.current?.focus()
+    }
+
+    wasConfirming.current = isConfirming
+  }, [isConfirming])
   const [wasDeleted, setWasDeleted] = useState(false)
 
   /**
@@ -63,6 +81,19 @@ export function UserDetailPage() {
       // `replace` impede que o botão Voltar traga de volta o detalhe de um
       // usuário que não existe mais.
       void navigate(listUrl, { replace: true })
+
+      /*
+       * O foco vai para o conteúdo principal, que tem `tabIndex={-1}`
+       * justamente para isso. Sem este passo ele cai no `<body>`, e quem
+       * navega por teclado recomeça do topo da página.
+       *
+       * Agendado, e não chamado direto: a navegação desmonta esta tela junto
+       * com o botão que estava focado, e é essa remoção que joga o foco no
+       * `<body>`. Chamar antes seria desfeito no instante seguinte.
+       */
+      setTimeout(() => {
+        document.querySelector<HTMLElement>('#conteudo')?.focus()
+      }, 0)
     },
   })
 
@@ -106,6 +137,7 @@ export function UserDetailPage() {
               <button
                 type="button"
                 className="button button--danger"
+                ref={deleteButtonRef}
                 onClick={() => {
                   setIsConfirming(true)
                 }}

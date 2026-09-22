@@ -18,6 +18,13 @@ interface ConfirmDeleteProps {
  * aprisionamento de foco e evita a classe de problemas de acessibilidade que
  * modais mal feitos introduzem. O foco vai para o botão de confirmar, e
  * `role="alertdialog"` faz o leitor de tela anunciar a pergunta.
+ *
+ * A **devolução** do foco ao fechar não mora aqui, e sim em quem abre. Duas
+ * razões: quando a limpeza deste efeito roda, o elemento de origem já saiu da
+ * árvore e o novo ainda não entrou; e só quem controla o estado sabe se a
+ * confirmação fechou por cancelamento — caso em que há para onde voltar — ou
+ * porque a exclusão terminou e a tela inteira foi embora. Ver
+ * `UserDetailPage`.
  */
 export function ConfirmDelete({
   description,

@@ -320,7 +320,10 @@ tbody tr:last-child td {
 .state {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: calc(var(--spacing) * 2);
+  /* Mais folga vertical que horizontal: o bloco é curto e centralizado, e sem
+     isso ele fica espremido entre o cabeçalho e o que vem depois. */
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 2);
+  margin-block: var(--spacing);
   text-align: center;
   background: var(--color-surface);
 }
@@ -379,6 +382,15 @@ tbody tr:last-child td {
   .is-stale {
     transition: none;
   }
+}
+
+/* Coluna estreita e centralizada, para as telas cujo conteúdo é um formulário.
+   Sem isso o formulário de 34rem fica encostado na esquerda de uma coluna de
+   70rem, e mais da metade da tela fica vazia à direita numa janela larga — lê
+   como página inacabada, não como escolha. */
+.column-narrow {
+  max-width: 34rem;
+  margin-inline: auto;
 }
 
 .user-form {
