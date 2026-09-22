@@ -296,13 +296,13 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S11, S13 · **Commit:** `dd855d5`
 
 ### TASK-WEB-08 — Acessibilidade e responsividade
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** fluxo completo operável por teclado com foco visível; campos com rótulo
   associado; erros anunciáveis por leitor de tela; layout utilizável em largura de
   telefone.
 - **Verificação:** percorrer cadastro, busca, edição e exclusão sem tocar no mouse;
   inspecionar em viewport estreito.
-- **Critérios:** S14 · **Commit:** —
+- **Critérios:** S14 · **Commit:** `6d23891`
 
 ### TASK-WEB-09 — Teste de fluxo do frontend
 - **Estado:** ⬜
@@ -408,6 +408,6 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710`, `dd855d5` | ida e volta pela URL e retorno da exclusão |
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem coberta; faltam formulário e clima |
-| S14 Utilizável por teclado | TASK-WEB-08 | — | percurso sem mouse |
+| S14 Utilizável por teclado | TASK-WEB-08 | `6d23891` | axe sem violações em 7 telas + fluxos por teclado |
 | S15 Executável pelo README | TASK-DOC-02 | — | setup em diretório limpo |
 | S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27`, `a0bc095` | gate ativo em modules/** e scripts/** |
