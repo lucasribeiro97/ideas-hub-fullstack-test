@@ -1,7 +1,9 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: ideas-hub-postgres
+    # Sem `container_name` fixo: o Compose deriva o nome do diretório do
+    # projeto, e um nome fixo impede que dois checkouts coexistam — conflito
+    # encontrado ao testar a instalação do zero num diretório separado.
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-ideas_hub}
