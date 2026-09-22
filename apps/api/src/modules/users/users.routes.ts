@@ -1,7 +1,13 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import type { Database } from '../../db/client.js'
-import { createUser, getUserById, listUsers, updateUser } from './users.service.js'
+import {
+  createUser,
+  deleteUser,
+  getUserById,
+  listUsers,
+  updateUser,
+} from './users.service.js'
 import {
   createUserBodySchema,
   listUsersQuerySchema,
@@ -77,6 +83,22 @@ export function usersRoutes(db: Database): FastifyPluginAsync {
         },
       },
       async (request) => updateUser(db, request.params.id, request.body),
+    )
+
+    route.delete(
+      '/users/:id',
+      {
+        schema: {
+          tags: ['users'],
+          summary: 'Remove um usuário',
+          params: userIdParamSchema,
+        },
+      },
+      async (request, reply) => {
+        await deleteUser(db, request.params.id)
+
+        return reply.status(204).send()
+      },
     )
   }
 }

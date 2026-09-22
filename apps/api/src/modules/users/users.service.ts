@@ -111,3 +111,21 @@ export async function updateUser(
 
   return toUserResponse(firstOrThrow(updated, 'update não retornou a linha alterada'))
 }
+
+/**
+ * Remove um usuário definitivamente.
+ *
+ * Sem soft delete, conforme os limites da SPEC §12: não há requisito de
+ * histórico ou recuperação, e uma coluna `deleted_at` obrigaria toda consulta
+ * a filtrá-la — inclusive o índice único de email, que passaria a permitir
+ * cadastrar de novo um email "removido".
+ *
+ * `returning` é o que distingue "removi" de "não havia o que remover": sem
+ * ele, apagar um id inexistente responderia 204 e o cliente acharia que
+ * funcionou.
+ */
+export async function deleteUser(db: Database, id: string): Promise<void> {
+  const deleted = await db.delete(users).where(eq(users.id, id)).returning({ id: users.id })
+
+  if (deleted.length === 0) throw new UserNotFoundError()
+}
