@@ -294,6 +294,7 @@ Excluídos do denominador, com o motivo:
 | `drizzle.config.ts`, `vite.config.ts` | Configuração declarativa, sem lógica |
 | `src/server.ts` (bootstrap) | Wiring de inicialização, exercitado indiretamente pelos testes de integração |
 | `src/main.tsx`, providers do React | Montagem da árvore, sem regra de negócio |
+| `src/scripts/import-users.ts` | Ponto de entrada do comando. **É testado**, por subprocesso: cinco casos cobrem relatório, `--help`, arquivo inexistente, opção inválida e ausência de `DATABASE_URL`, verificando saída e código de retorno. O coletor v8 instrumenta apenas o processo principal e não consegue atribuir essa execução, então o arquivo apareceria como 0% mesmo estando coberto — o oposto do que a métrica deveria comunicar |
 
 A exclusão é listada aqui de forma explícita: exclusão documentada é decisão de escopo,
 exclusão silenciosa é maquiagem de métrica.
