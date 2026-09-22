@@ -19,6 +19,15 @@
   --spacing: 1rem;
   --radius: 0.375rem;
 
+  /* Tokens do gráfico. A cor da série é o azul da paleta de referência,
+     validada contra as nossas superfícies em ambos os modos: faixa de
+     luminosidade, piso de croma e contraste mínimo de 3:1 passam nos dois.
+     Grade e eixo ficam um tom acima da superfície — orientam sem competir. */
+  --chart-series-1: #2a78d6;
+  --chart-grid: #e1e0d9;
+  --chart-axis: #c3c2b7;
+  --chart-muted: #898781;
+
   color-scheme: light dark;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
@@ -167,6 +176,13 @@ body {
     --color-primary: #7aa2ff;
     --color-primary-contrast: #10203f;
     --color-danger: #f87171;
+
+    /* Passos escolhidos para a superfície escura, não uma inversão automática
+       da versão clara. */
+    --chart-series-1: #3987e5;
+    --chart-grid: #2c2c2a;
+    --chart-axis: #383835;
+    --chart-muted: #898781;
   }
 }
 
@@ -543,4 +559,66 @@ tbody tr:last-child td {
 .weather__details dd {
   margin: 0.125rem 0 0;
   font-size: 1.0625rem;
+}
+
+.chart {
+  margin-top: var(--spacing);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+}
+
+.chart__title {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+
+.chart__summary {
+  margin: 0.25rem 0 var(--spacing);
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+/* A altura acomoda a área de plotagem mais a faixa do eixo horizontal: fixar
+   só a plotagem faria os rótulos do eixo ficarem cortados. */
+.chart__plot {
+  min-height: 260px;
+}
+
+.chart__tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  font-size: 0.875rem;
+}
+
+.chart__tooltip span {
+  color: var(--color-text-muted);
+}
+
+.chart__table {
+  margin-top: var(--spacing);
+}
+
+.chart__table summary {
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+.chart__table .table-wrapper {
+  margin-top: 0.5rem;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+/* Colunas numéricas alinham à direita com dígitos de largura igual, para que
+   a vírgula fique na mesma posição em todas as linhas. */
+.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }

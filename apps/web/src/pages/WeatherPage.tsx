@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api/client.ts'
 import { ErrorState } from '../components/ErrorState.tsx'
 import { PageHeading } from '../components/PageHeading.tsx'
+import { TemperatureChart } from '../components/TemperatureChart.tsx'
 import { WeatherSummary } from '../components/WeatherSummary.tsx'
 import { useWeather } from '../hooks/useWeather.ts'
 
@@ -105,6 +106,7 @@ export function WeatherPage() {
           )}
 
           <WeatherSummary weather={data} />
+          <TemperatureChart hourly={data.hourly} city={data.city} />
         </>
       )}
     </>
