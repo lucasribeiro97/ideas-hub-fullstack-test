@@ -25,6 +25,9 @@ serviço externo de informações climáticas.
 - [Com mais tempo](#com-mais-tempo)
 - [Documentação do processo](#documentação-do-processo)
 
+> A sequência abaixo foi executada do zero num diretório limpo, a partir de um clone
+> novo, antes desta entrega. Os 541 testes passam numa instalação virgem.
+
 ## Pré-requisitos
 
 | Ferramenta | Versão | Observação |
@@ -74,10 +77,11 @@ cd apps/web && npm run dev
 Abra **http://localhost:5173**. A documentação da API fica em
 **http://localhost:3000/docs**.
 
-> **Porta 5173 ocupada?** O Vite escolhe outra automaticamente, mas a API só aceita
-> requisições da origem configurada em `CORS_ORIGIN`. Se o Vite subir em outra porta,
-> ajuste `CORS_ORIGIN` no `.env` para a porta que ele indicou e reinicie a API —
-> caso contrário a interface mostra "Não foi possível contatar o servidor".
+> **Porta 5173 ocupada?** O Vite escolhe outra e informa no terminal. Repare que a
+> API só aceita requisições da origem configurada em `CORS_ORIGIN`: se o Vite subir em
+> outra porta, ajuste `CORS_ORIGIN` no `.env` e reinicie a API. Sem isso a interface
+> carrega mas mostra "Não foi possível contatar o servidor" — o navegador bloqueia as
+> requisições antes de saírem.
 
 ## Importando o CSV de origem
 
