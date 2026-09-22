@@ -42,6 +42,17 @@ export const createUserBodySchema = z.object({
 
 export type CreateUserInput = z.infer<typeof createUserBodySchema>
 
+/**
+ * Identificador na rota.
+ *
+ * Validar aqui é o que separa "id malformado" de "usuário inexistente": sem
+ * isso, `/users/abc` chegaria ao banco e o Postgres devolveria erro de sintaxe
+ * de UUID, que viraria 500 em vez do 400 previsto na SPEC §6.
+ */
+export const userIdParamSchema = z.object({
+  id: z.uuid('id deve ser um UUID'),
+})
+
 export const userResponseSchema = z.object({
   id: z.uuid(),
   name: z.string(),

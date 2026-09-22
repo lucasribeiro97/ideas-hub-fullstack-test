@@ -1,5 +1,7 @@
+import { eq } from 'drizzle-orm'
 import type { Database } from '../../db/client.js'
 import { firstOrThrow } from '../../lib/rows.js'
+import { UserNotFoundError } from '../../lib/errors.js'
 import { users } from '../../db/schema.js'
 import { toUserResponse, type CreateUserInput, type UserResponse } from './users.schemas.js'
 
@@ -19,4 +21,19 @@ export async function createUser(db: Database, input: CreateUserInput): Promise<
     .returning()
 
   return toUserResponse(firstOrThrow(created, 'insert não retornou a linha criada'))
+}
+
+/**
+ * Busca um usuário pelo identificador.
+ *
+ * A ausência é condição de negócio, não erro de programação: por isso lança
+ * UserNotFoundError, que o tratamento de erros traduz em 404, em vez de usar
+ * firstOrThrow, que sinalizaria defeito interno.
+ */
+export async function getUserById(db: Database, id: string): Promise<UserResponse> {
+  const [found] = await db.select().from(users).where(eq(users.id, id)).limit(1)
+
+  if (!found) throw new UserNotFoundError()
+
+  return toUserResponse(found)
 }
