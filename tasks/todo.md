@@ -257,12 +257,12 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S11 · **Commit:** `07de471`
 
 ### TASK-WEB-03 — Listagem com filtros na URL
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** busca, ordenação, página e itens por página vivem em `useSearchParams` e
   são a fonte de verdade da tela. Recarregar ou compartilhar a URL preserva o contexto.
 - **Verificação:** aplicar filtros, copiar a URL, abrir em aba nova e obter o mesmo
   resultado.
-- **Critérios:** S11 · **Commit:** —
+- **Critérios:** S11 · **Commit:** `8c3d710`
 
 ### TASK-WEB-04 — Debounce e cancelamento de requisições obsoletas
 - **Estado:** ⬜
@@ -405,7 +405,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial), `82e54ad` | ausente de respostas, cabeçalhos e log real |
 | S9 Cache expira e protege | TASK-WEATHER-02 | `958a3ed` | TTL, expiração e stale-if-error testados |
 | S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
-| S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | — | recarga preserva contexto |
+| S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710` (parcial) | ida e volta pela URL testada; falta detalhe |
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | — | inspeção da aba de rede |
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | — | provocação manual |
 | S14 Utilizável por teclado | TASK-WEB-08 | — | percurso sem mouse |
