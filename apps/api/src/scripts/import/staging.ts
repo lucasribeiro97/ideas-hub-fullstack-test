@@ -2,6 +2,7 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import type { Pool } from 'pg'
 import { from as copyFrom } from 'pg-copy-streams'
+import { firstOrThrow } from '../../lib/rows.js'
 import type { ParsedUser } from './parse.js'
 
 /**
@@ -111,5 +112,6 @@ export async function countStagingRows(pool: Pool): Promise<number> {
     `SELECT count(*)::text AS total FROM ${STAGING_TABLE}`,
   )
 
-  return Number(rows[0]?.total ?? 0)
+  // `count(*)` sempre devolve uma linha; ausência aqui seria defeito interno.
+  return Number(firstOrThrow(rows, 'count na staging não retornou linha').total)
 }
