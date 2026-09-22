@@ -1,4 +1,5 @@
 import type { Pool } from 'pg'
+import { firstOrThrow } from '../../lib/rows.js'
 import { STAGING_TABLE } from './staging.js'
 
 /**
@@ -57,11 +58,18 @@ export async function mergeStagingIntoUsers(pool: Pool): Promise<MergeResult> {
        FROM ${STAGING_TABLE}`,
   )
 
-  const staged = Number(rows[0]?.total ?? 0)
-  const distinctEmails = Number(rows[0]?.distinct_emails ?? 0)
+  // `count(*)` sempre devolve uma linha; ausência aqui seria defeito interno.
+  const counts = firstOrThrow(rows, 'contagem da staging não retornou linha')
+  const staged = Number(counts.total)
+  const distinctEmails = Number(counts.distinct_emails)
 
   const result = await pool.query(MERGE_SQL)
-  const inserted = result.rowCount ?? 0
+
+  // `rowCount` é nulo apenas em comandos que não afetam linhas; um INSERT
+  // sempre o preenche. Tratar como zero mascararia um INSERT que não rodou.
+  if (result.rowCount === null) throw new Error('INSERT de deduplicação não reportou linhas')
+
+  const inserted = result.rowCount
 
   return {
     inserted,

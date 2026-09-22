@@ -30,13 +30,21 @@ export interface ImportStats {
   linesRead: number
   valid: number
   rejected: number
+  /**
+   * Linhas em branco ignoradas.
+   *
+   * Não são rejeições: um arquivo terminando com quebra de linha é normal, e
+   * reportá-las como defeito seria ruído. Mas somem da conferência se não
+   * forem contadas, e um relatório cujos números não fecham é pior que nenhum.
+   */
+  blankLines: number
   rejectionsByReason: Record<string, number>
   /** Primeiras rejeições, para o relatório. O total vive em `rejected`. */
   samples: RejectedLine[]
 }
 
 export function createImportStats(): ImportStats {
-  return { linesRead: 0, valid: 0, rejected: 0, rejectionsByReason: {}, samples: [] }
+  return { linesRead: 0, valid: 0, rejected: 0, blankLines: 0, rejectionsByReason: {}, samples: [] }
 }
 
 export const EXPECTED_HEADER = ['id', 'name', 'email', 'phone'] as const
@@ -166,7 +174,10 @@ export async function* streamValidUsers(
       stats.linesRead += 1
 
       // Linha em branco no fim do arquivo é comum e não é registro inválido.
-      if (line.trim().length === 0) continue
+      if (line.trim().length === 0) {
+        stats.blankLines += 1
+        continue
+      }
 
       const fields = splitFields(line)
 

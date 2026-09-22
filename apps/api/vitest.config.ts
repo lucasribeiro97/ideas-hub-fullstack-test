@@ -30,6 +30,10 @@ export default defineConfig({
       // silenciosa seria maquiagem de métrica.
       exclude: [
         'src/server.ts', // bootstrap: wiring de inicialização
+        // Ponto de entrada do comando de importação. É testado por
+        // subprocesso, execução que o coletor v8 não consegue atribuir — ver
+        // SPEC §8 para a distinção entre esta exclusão e as demais.
+        'src/scripts/import-users.ts',
         'src/db/migrations/**', // schema versionado, verificado pela própria migration
         '**/*.d.ts',
         '**/types.ts',

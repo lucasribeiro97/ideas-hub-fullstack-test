@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
+import type { Pool } from 'pg'
 import { clearUsers, connectTestDatabase } from './helpers/database.js'
 import type { ParsedUser } from '../src/scripts/import/parse.js'
 import { mergeStagingIntoUsers } from '../src/scripts/import/dedupe.js'
@@ -273,5 +274,29 @@ describe('contagens do relatório', () => {
     const result = await mergeStagingIntoUsers(pool)
 
     expect(result).toMatchObject({ inserted: 0, distinctEmails: 0, duplicatesInFile: 0 })
+  })
+})
+
+/*
+ * `rowCount` nulo não acontece num INSERT real — o driver sempre o preenche.
+ * Mas tratá-lo como zero mascararia um INSERT que não executou, então o
+ * comportamento é verificado com um pool simulado em vez de ficar por suposição.
+ */
+describe('retorno inesperado do driver', () => {
+  function fakePool(rowCount: number | null): Pool {
+    return {
+      query: (sql: unknown) =>
+        typeof sql === 'string' && sql.includes('count(')
+          ? Promise.resolve({ rows: [{ total: '0', distinct_emails: '0' }] })
+          : Promise.resolve({ rowCount }),
+    } as unknown as Pool
+  }
+
+  it('falha quando o INSERT não reporta linhas afetadas', async () => {
+    await expect(mergeStagingIntoUsers(fakePool(null))).rejects.toThrow(/não reportou linhas/)
+  })
+
+  it('aceita zero linhas afetadas, que é resultado legítimo', async () => {
+    await expect(mergeStagingIntoUsers(fakePool(0))).resolves.toMatchObject({ inserted: 0 })
   })
 })

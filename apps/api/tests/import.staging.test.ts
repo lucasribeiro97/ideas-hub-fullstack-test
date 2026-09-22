@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
-import { connectTestDatabase } from './helpers/database.js'
+import { clearUsers, connectTestDatabase } from './helpers/database.js'
 import type { ParsedUser } from '../src/scripts/import/parse.js'
 import {
   STAGING_TABLE,
@@ -11,10 +11,15 @@ import {
   toCopyLine,
 } from '../src/scripts/import/staging.js'
 
-const { pool } = connectTestDatabase()
+const { db, pool } = connectTestDatabase()
 
 beforeEach(async () => {
   await createStagingTable(pool)
+  // Limpa `users` também: o teste "não interfere na tabela users" afirma que
+  // ela está vazia, e sem isso dependeria de nenhum outro arquivo de teste ter
+  // deixado dados para trás — o que o tornava intermitente conforme a ordem de
+  // execução mudava.
+  await clearUsers(db)
 })
 
 afterAll(async () => {
