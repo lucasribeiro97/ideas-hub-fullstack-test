@@ -318,8 +318,9 @@ Requisitos mais importantes, do critério ao commit e à verificação.
 | Busca sem disparo por tecla | `TASK-WEB-04` | `6266f2f` | Abort verificado no sinal recebido pelo servidor simulado |
 | Utilizável por teclado | `TASK-WEB-08` | `6d23891` | axe sem violações em sete telas; fluxos percorridos sem mouse |
 | Fluxo do frontend | `TASK-WEB-09` | `fb718e4` | Nove percursos sobre API simulada com comportamento real |
+| Tela não faz requisição supérflua nem órfã | — | `bde88c1`, `a224f54` | 14 fluxos percorridos no Chrome contra o log da API: 17 requisições, só os dois erros esperados |
 | Contrato documentado | `TASK-DOC-01` | `914baf6` | Seis endpoints no Swagger; exemplos executados conferem |
-| Executável pelo README | `TASK-DOC-02` | `f1b1065` | Clone novo em diretório limpo: 541 testes passam |
+| Executável pelo README | `TASK-DOC-02` | `f1b1065` | Clone novo em diretório limpo: 553 testes passam |
 | Cobertura no domínio | `TASK-INFRA-06` | `6449c27` | Gate provado **falhando** de propósito, com código de saída 1 |
 
 O histórico completo distingue as fases por prefixo: `spec:`, `plan:`, `tasks:`,

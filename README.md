@@ -26,7 +26,7 @@ serviço externo de informações climáticas.
 - [Documentação do processo](#documentação-do-processo)
 
 > A sequência abaixo foi executada do zero num diretório limpo, a partir de um clone
-> novo, antes desta entrega. Os 541 testes passam numa instalação virgem.
+> novo, antes desta entrega. Os 553 testes passam numa instalação virgem.
 
 ## Pré-requisitos
 
