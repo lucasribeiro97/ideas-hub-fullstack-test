@@ -243,11 +243,11 @@ requisito atualiza a SPEC ou o plano primeiro.
 ## M5 — Frontend: usuários
 
 ### TASK-WEB-01 — Cliente da API e tipos do contrato
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** módulo único de acesso à API com tipos correspondentes ao contrato da §6
   e tratamento uniforme de erro.
 - **Verificação:** `npm run typecheck` limpo.
-- **Critérios:** — · **Commit:** —
+- **Critérios:** — · **Commit:** `ed57616`
 
 ### TASK-WEB-02 — Layout, rotas e navegação
 - **Estado:** ⬜
