@@ -344,12 +344,12 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S10 · **Commit:** `914baf6`
 
 ### TASK-DOC-02 — README completo
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** pré-requisitos, variáveis sem valores secretos, migrations, **extração do
   `.tgz` com `tar -xzf`** (premissa P1), importação, execução, testes, decisões
   técnicas, trade-offs, limitações e link para `AI_USAGE.md`.
 - **Verificação:** setup do zero em diretório limpo seguindo apenas o documento.
-- **Critérios:** S15 · **Commit:** —
+- **Critérios:** S15 · **Commit:** `f1b1065`
 
 ### TASK-DOC-03 — `AI_USAGE.md`
 - **Estado:** ⬜
@@ -409,5 +409,5 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem, formulário e detalhe cobertos |
 | S14 Utilizável por teclado | TASK-WEB-08 | `6d23891` | axe sem violações em 7 telas + fluxos por teclado |
-| S15 Executável pelo README | TASK-DOC-02 | — | setup em diretório limpo |
+| S15 Executável pelo README | TASK-DOC-02 | `f1b1065` | clone novo em diretório limpo: 541 testes passam |
 | S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27`, `a0bc095` | gate ativo em modules/** e scripts/** |
