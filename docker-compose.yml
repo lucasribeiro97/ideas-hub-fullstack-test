@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ideas-hub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ideas_hub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ideas_hub_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-ideas_hub}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # O healthcheck existe para que as migrations e os testes não tentem
+      # conectar antes do banco aceitar conexões.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ideas_hub} -d ${POSTGRES_DB:-ideas_hub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
