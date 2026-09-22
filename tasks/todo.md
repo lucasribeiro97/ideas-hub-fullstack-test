@@ -250,11 +250,11 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** — · **Commit:** `ed57616`
 
 ### TASK-WEB-02 — Layout, rotas e navegação
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** rotas navegáveis para listagem, detalhe, cadastro, edição e clima.
   Navegação por URL direta funciona em todas.
 - **Verificação:** abrir cada rota diretamente no navegador renderiza a tela correta.
-- **Critérios:** S11 · **Commit:** —
+- **Critérios:** S11 · **Commit:** `07de471`
 
 ### TASK-WEB-03 — Listagem com filtros na URL
 - **Estado:** ⬜
