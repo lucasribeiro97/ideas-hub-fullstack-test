@@ -316,14 +316,14 @@ requisito atualiza a SPEC ou o plano primeiro.
 ## M6 — Frontend: clima
 
 ### TASK-WEB-10 — Tela de clima
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** busca por cidade exibindo temperatura, umidade e condição atual. Cidade
   inexistente e falha do serviço produzem mensagens distintas. Dado servido de cache
   expirado é sinalizado ao usuário. **A cidade, região e país resolvidos aparecem em
   destaque** (premissa P7): a origem faz busca aproximada, e sem isso um erro de
   digitação devolve outra cidade sem que ninguém perceba.
 - **Verificação:** testar cidade válida, cidade inventada e API indisponível.
-- **Critérios:** S13 · **Commit:** —
+- **Critérios:** S13 · **Commit:** `6f8820a`
 
 ### TASK-WEB-11 — Gráfico de variação de temperatura
 - **Estado:** ⬜
