@@ -352,13 +352,13 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S15 · **Commit:** `f1b1065`
 
 ### TASK-DOC-03 — `AI_USAGE.md`
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** ferramentas e modelos; recursos equivalentes a skills usados; seção por
   fase; exemplos de instruções com resumo da resposta; ao menos uma sugestão corrigida
   ou rejeitada; ao menos uma mudança de spec anterior ao código; matriz de
   rastreabilidade; como o código foi validado; limitações percebidas.
 - **Verificação:** cada item do enunciado conferido um a um contra o arquivo.
-- **Critérios:** — · **Commit:** —
+- **Critérios:** — · **Commit:** `a150902`
 
 ---
 
