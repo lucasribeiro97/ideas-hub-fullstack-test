@@ -54,6 +54,14 @@ services:
       # execução sem ninguém pedir.
       - key: NODE_VERSION
         value: "22"
+      # Faz o mesmo que o `--include=dev` do buildCommand, e existe porque o
+      # Render **não atualiza o comando de build de um serviço já criado** num
+      # sync de blueprint: o campo fica bloqueado, gerenciado pelo blueprint, e
+      # continua com o valor do momento da criação. A variável de ambiente é
+      # editável, então é por ela que a correção alcança um serviço existente.
+      # Os dois juntos cobrem o serviço novo e o já provisionado.
+      - key: NPM_CONFIG_INCLUDE
+        value: dev
       - key: DATABASE_URL
         fromDatabase:
           name: ideas-hub-db
