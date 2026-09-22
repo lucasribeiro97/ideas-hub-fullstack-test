@@ -22,6 +22,7 @@ export function UserDetailPage() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const [isConfirming, setIsConfirming] = useState(false)
+  const [wasDeleted, setWasDeleted] = useState(false)
 
   /**
    * Query string da listagem de onde se veio.
@@ -37,11 +38,26 @@ export function UserDetailPage() {
   const { data: user, isPending, isError, error, refetch } = useQuery({
     queryKey: ['user', id],
     queryFn: ({ signal }) => getUser(id as string, { signal }),
+    /*
+     * Desligada assim que a exclusão conclui.
+     *
+     * Entre o fim da exclusão e a navegação sair desta tela existe um
+     * intervalo em que o componente continua montado. Sem esta guarda, limpar
+     * a entrada do cache faz o TanStack Query buscar o registro de novo — e
+     * receber 404, porque ele acabou de ser removido. A requisição não afeta o
+     * resultado, mas aparece como falha no painel de rede e polui o log do
+     * servidor com um erro que não é erro.
+     */
+    enabled: !wasDeleted,
   })
 
   const removal = useMutation({
     mutationFn: () => deleteUser(id as string),
     onSuccess: () => {
+      // Antes de mexer no cache: impede que a consulta desta tela reaja à
+      // limpeza buscando um registro que não existe mais.
+      setWasDeleted(true)
+
       void queryClient.invalidateQueries({ queryKey: ['users'] })
       queryClient.removeQueries({ queryKey: ['user', id] })
       // `replace` impede que o botão Voltar traga de volta o detalhe de um

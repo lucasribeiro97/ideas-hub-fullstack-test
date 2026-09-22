@@ -251,6 +251,39 @@ describe('confirmação de exclusão', () => {
  * Sem preservar a origem, excluir a partir de uma busca filtrada devolveria a
  * pessoa à listagem sem filtro, obrigando-a a refazer a busca.
  */
+/*
+ * Entre o fim da exclusão e a navegação sair da tela existe um intervalo em
+ * que o componente continua montado. Limpar o cache nesse intervalo fazia a
+ * consulta buscar o registro de novo e receber 404 — requisição órfã que
+ * aparecia como falha no painel de rede. Encontrado usando a aplicação.
+ */
+describe('exclusão não deixa requisição órfã', () => {
+  it('não busca o registro depois de removê-lo', async () => {
+    const user = userEvent.setup()
+    const detailCalls: string[] = []
+
+    apiServer.use(
+      http.get(`${API_URL}/users/:id`, ({ request }) => {
+        detailCalls.push(new URL(request.url).pathname)
+
+        return HttpResponse.json(buildUser({ id: USER_ID, name: 'Ana Souza' }))
+      }),
+      http.delete(`${API_URL}/users/:id`, () => new HttpResponse(null, { status: 204 })),
+      http.get(`${API_URL}/users`, () => HttpResponse.json(buildUserList([]))),
+    )
+    renderAt(`/users/${USER_ID}`)
+
+    await user.click(await screen.findByRole('button', { name: 'Excluir' }))
+    const callsBeforeDelete = detailCalls.length
+    await user.click(screen.getByRole('button', { name: /sim, excluir/i }))
+
+    // Chega à listagem.
+    await screen.findByRole('heading', { name: /nenhum usuário cadastrado/i })
+
+    expect(detailCalls.length).toBe(callsBeforeDelete)
+  })
+})
+
 describe('retorno à listagem preserva os filtros', () => {
   function mockList(): void {
     apiServer.use(
