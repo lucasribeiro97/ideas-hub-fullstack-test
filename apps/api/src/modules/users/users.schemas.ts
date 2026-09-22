@@ -9,10 +9,13 @@ import type { User } from '../../db/schema.js'
  * `details` da resposta de erro.
  */
 
-const MAX_NAME = 120
+// Exportados para que a importação em massa aplique exatamente os mesmos
+// limites da API. Se divergissem, o CSV poderia gravar um nome que o
+// formulário de edição depois recusaria.
+export const MAX_NAME = 120
 // 254 é o limite de endereço de email definido pela RFC 5321.
-const MAX_EMAIL = 254
-const MAX_PHONE = 30
+export const MAX_EMAIL = 254
+export const MAX_PHONE = 30
 
 export const createUserBodySchema = z.object({
   name: z
