@@ -102,11 +102,11 @@ requisito atualiza a SPEC ou o plano primeiro.
 ## M2 — API de usuários
 
 ### TASK-API-01 — Ambiente de teste de integração
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** Testcontainers sobe Postgres efêmero, aplica migrations e oferece limpeza
   entre casos. Um container por suíte, não por arquivo (risco R4).
 - **Verificação:** suíte de exemplo conecta, cria e lê um registro.
-- **Critérios:** S4 · **Commit:** —
+- **Critérios:** S4 · **Commit:** `abd8535`
 
 ### TASK-API-02 — Erros de domínio e tradução para HTTP
 - **Estado:** ⬜
