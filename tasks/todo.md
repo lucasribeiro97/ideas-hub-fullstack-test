@@ -130,14 +130,14 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S6 · **Commit:** `d20c4f5`
 
 ### TASK-API-05 — `GET /users` com busca, ordenação e paginação
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** parâmetros e resposta exatamente como a §6 da SPEC. `search` casa parcial
   e sem distinção de caixa em `name` **ou** `email`. `perPage` limitado a 100. `meta`
   com `page`, `perPage`, `total` e `totalPages`.
 - **Verificação:** testes cobrindo busca por trecho do meio da palavra, ordenação nos
   dois sentidos, página além do fim devolvendo lista vazia com `meta` coerente, e
   `perPage` acima do limite sendo rejeitado.
-- **Critérios:** S5 · **Commit:** —
+- **Critérios:** S5 · **Commit:** `761017d`
 
 ### TASK-API-06 — `PATCH /users/:id`
 - **Estado:** ⬜
@@ -392,7 +392,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S2 Importação reproduzível | TASK-IMPORT-02, TASK-IMPORT-03, TASK-IMPORT-05 | — | dupla execução idêntica |
 | S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | — | os números fecham |
 | S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7` | 409 na API, inclusive em caixa diferente |
-| S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f` (parcial) | GIN utilizável via EXPLAIN; falta API |
+| S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f`, `761017d` | 22 testes na API; uso espontâneo do GIN só com volume, no M4 |
 | S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial) | provado em rota real no GET; falta DELETE |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial) | redact testado; falta M3 |
