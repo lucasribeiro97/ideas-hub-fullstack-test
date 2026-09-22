@@ -148,10 +148,10 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S4, S6 · **Commit:** `bcf8bf8`
 
 ### TASK-API-07 — `DELETE /users/:id`
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** `204` ao remover, `404` para inexistente. Remoção definitiva, sem soft delete.
 - **Verificação:** testes dos dois casos; busca posterior devolve `404`.
-- **Critérios:** S6 · **Commit:** —
+- **Critérios:** S6 · **Commit:** `b05d640`
 
 ---
 
@@ -393,7 +393,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | — | os números fecham |
 | S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7`, `bcf8bf8` | 409 no POST e no PATCH, inclusive em caixa diferente |
 | S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f`, `761017d` | 22 testes na API; uso espontâneo do GIN só com volume, no M4 |
-| S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial) | provado em rota real no GET; falta DELETE |
+| S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial), `b05d640` | provado nos cinco endpoints de usuários |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial) | redact testado; falta M3 |
 | S9 Cache expira e protege | TASK-WEATHER-02 | — | teste de TTL e stale |
