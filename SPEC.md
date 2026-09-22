@@ -238,10 +238,26 @@ users
 | `UNIQUE (lower(email))` | Garante unicidade sem distinguir caixa preservando o valor original da origem. Funcional, sem depender de extensão. |
 | `GIN (name gin_trgm_ops)` | `ILIKE '%termo%'` sobre 1,6M de linhas é varredura completa sem isso. Decisão não óbvia, exigindo `pg_trgm`. |
 | `GIN (email gin_trgm_ops)` | Mesma razão, para busca parcial por email. |
-| `BTREE (created_at DESC)` | Sustenta a ordenação padrão da listagem. |
+| `BTREE (created_at DESC, id ASC)` | Sustenta a ordenação padrão da listagem **incluindo o desempate por `id`**. Ver nota abaixo: a versão de coluna única não servia. |
 
 O índice único é funcional e não simples porque a decisão P4 exige comparação sem caixa,
 e normalizar o valor gravado faria o banco divergir do arquivo de origem.
+
+**Por que o índice de ordenação é composto.** A listagem ordena por
+`created_at DESC, id ASC` — o `id` é o desempate que mantém a paginação estável quando
+há timestamps repetidos. Um índice apenas em `created_at DESC` **não atende** essa
+cláusula: o PostgreSQL descarta o índice e faz varredura sequencial com ordenação
+completa. Medido sobre 220.875 registros:
+
+| Consulta | `created_at DESC` | `created_at DESC, id ASC` |
+|---|---:|---:|
+| Primeira página | 29 ms (`Seq Scan` + `Sort`) | **0,14 ms** (`Index Scan`) |
+| `OFFSET 100000` | 149 ms, ordenação em disco (22 MB) | **37 ms**, sem disco |
+
+A ordenação **ascendente** por `created_at` continua exigindo ordenação, porque a
+varredura reversa do índice produz `id` em ordem contrária à pedida. Cobrir as duas
+direções exigiria um segundo índice, o que não se justifica: o padrão da listagem é
+decrescente. Limitação registrada em vez de otimizada especulativamente.
 
 ## 8. Estratégia de testes
 
