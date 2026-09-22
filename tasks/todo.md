@@ -109,12 +109,12 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S4 · **Commit:** `abd8535`
 
 ### TASK-API-02 — Erros de domínio e tradução para HTTP
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** erros tipados traduzidos para HTTP em um único ponto, no formato da §6.
   Nenhuma resposta expõe stack trace, SQL ou mensagem de driver.
 - **Verificação:** teste força erro de banco e confirma que o corpo da resposta não
   contém texto do driver.
-- **Critérios:** S6 · **Commit:** —
+- **Critérios:** S6 · **Commit:** `968f5b0`
 
 ### TASK-API-03 — `POST /users`
 - **Estado:** ⬜
@@ -393,7 +393,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | — | os números fecham |
 | S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f` (parcial) | constraint provada no banco; falta API |
 | S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f` (parcial) | GIN utilizável via EXPLAIN; falta API |
-| S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | — | teste de integração |
+| S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0` (parcial) | 400/422/404/500 provados; faltam rotas reais |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial) | redact testado; falta M3 |
 | S9 Cache expira e protege | TASK-WEATHER-02 | — | teste de TTL e stale |
