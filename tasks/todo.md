@@ -74,26 +74,28 @@ requisito atualiza a SPEC ou o plano primeiro.
 ## M1 — Esquema e índices
 
 ### TASK-DB-01 — Schema `users` e migration inicial
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** tabela conforme §7 da SPEC, com `phone` nulável e timestamps com timezone.
 - **Verificação:** migration aplica em base vazia sem erro.
-- **Critérios:** S1 · **Commit:** —
+- **Critérios:** S1 · **Commit:** `4e80b2f`
 
 ### TASK-DB-02 — Unicidade de email sem distinção de caixa
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** índice único funcional em `lower(email)`. SQL escrito à mão na migration
   se o `drizzle-kit` não gerar (risco R1). O valor gravado preserva a caixa da origem.
 - **Verificação:** inserir `a@x.com` e depois `A@X.com` é rejeitado pelo banco;
   `\d users` mostra o índice funcional.
-- **Critérios:** S4 · **Commit:** —
+- **Critérios:** S4 · **Commit:** `4e80b2f`
 
 ### TASK-DB-03 — Índices de busca e ordenação
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** `CREATE EXTENSION pg_trgm`; índices GIN trigram em `name` e `email`;
   btree em `created_at DESC`.
 - **Verificação:** `EXPLAIN` de um `ILIKE '%termo%'` usa o índice GIN e não varredura
-  sequencial — verificado após a importação, quando há volume.
-- **Critérios:** S5 · **Commit:** —
+  sequencial. **Parcial:** com `enable_seqscan=off` o plano usa `Bitmap Index Scan` nos
+  dois índices GIN, provando que são utilizáveis. A escolha espontânea do planner só é
+  verificável com volume, no M4.
+- **Critérios:** S5 · **Commit:** `4e80b2f`
 
 ---
 
@@ -386,11 +388,11 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 
 | Critério | Tarefas | Commit | Verificação |
 |---|---|---|---|
-| S1 Banco e migrations | TASK-INFRA-01, TASK-INFRA-02, TASK-DB-01 | — | migration em base vazia |
+| S1 Banco e migrations | TASK-INFRA-01, TASK-INFRA-02, TASK-DB-01 | `6449c27`, `4e80b2f` | migration em base vazia + reexecução |
 | S2 Importação reproduzível | TASK-IMPORT-02, TASK-IMPORT-03, TASK-IMPORT-05 | — | dupla execução idêntica |
 | S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | — | os números fecham |
-| S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | — | teste de integração |
-| S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | — | teste de integração |
+| S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f` (parcial) | constraint provada no banco; falta API |
+| S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f` (parcial) | GIN utilizável via EXPLAIN; falta API |
 | S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | — | teste de integração |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial) | redact testado; falta M3 |
