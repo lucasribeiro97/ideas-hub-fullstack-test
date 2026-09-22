@@ -24,11 +24,19 @@ services:
     plan: free
     rootDir: apps/api
     buildCommand: npm ci && npm run build
-    # As migrations rodam antes de o tráfego chegar à nova versão. Usam o
-    # pacote compilado, e não `tsx`, que é dependência de desenvolvimento e não
-    # existe aqui — foi por isso que o build passou a copiar os .sql para dist/.
-    preDeployCommand: npm run db:migrate:dist
-    startCommand: npm start
+    # As migrations rodam na inicialização, e não como `preDeployCommand`, que o
+    # Render recusa no plano gratuito: "pre-deploy command is not supported for
+    # free tier services". O encadeamento com `&&` é o que garante que o
+    # servidor não sobe com o schema desatualizado.
+    #
+    # Rodar a cada início é seguro porque o migrador do Drizzle registra o que
+    # já aplicou e ignora o resto — e no plano gratuito, que hiberna, isso
+    # acontece com frequência. O custo é alguns segundos no primeiro acesso.
+    #
+    # Usa o pacote compilado, e não `tsx`, que é dependência de desenvolvimento
+    # e não existe aqui — foi por isso que o build passou a copiar os .sql para
+    # dist/.
+    startCommand: npm run db:migrate:dist && npm start
     healthCheckPath: /health
     envVars:
       # Precisa vir do ambiente, nunca de arquivo .env: o mesmo arquivo é lido
