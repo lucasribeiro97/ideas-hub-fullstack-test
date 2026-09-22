@@ -372,7 +372,8 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** — · **Commit:** —
 
 ### TASK-OPT-02 — Pipeline de CI
-- **Estado:** ⬜
+- **Estado:** ⬜ absorvida por `TASK-DEPLOY-03`, que roda as mesmas verificações e
+  ainda condiciona a publicação a elas
 - **Aceite:** GitHub Actions com lint, typecheck, testes e cobertura por push. Se
   Testcontainers não funcionar no runner, cair para serviço Postgres do próprio Actions
   (risco R4, questão Q4).
@@ -441,6 +442,31 @@ requisito atualiza a SPEC ou o plano primeiro.
   explicitamente não ser necessário publicar. O plano gratuito do Render hiberna o
   serviço após inatividade, então o primeiro acesso de quem avaliar será lento — o
   README precisa avisar, senão a lentidão é lida como defeito.
+
+### TASK-DEPLOY-03 — Publicação automática com verificação antes
+- **Estado:** ⬜
+- **Motivação:** o blueprint foi criado a partir da URL do repositório público, e instalar
+  o app do Render no GitHub depois **não religa** um recurso existente — verificado com um
+  push real, que não disparou deploy nenhum. Recriar o blueprint resolveria, mas mudaria
+  as URLs já publicadas no README.
+- **Decisão:** usar o Deploy Hook de cada serviço, chamado por um workflow do GitHub
+  Actions. O efeito prático é o do deploy automático, **com uma diferença que importa: a
+  publicação só acontece se lint, typecheck e testes passarem.** O deploy automático do
+  Render publicaria de qualquer jeito.
+- **Aceite:**
+  1. `push` na `main` roda lint, typecheck e testes dos dois aplicativos.
+  2. O frontend também passa pelo `build`, que inclui a guarda do `bundleType`.
+  3. A publicação só roda se tudo acima passar, e só em `push` na `main` — nunca em
+     pull request.
+  4. As URLs dos hooks são segredos do repositório, nunca versionadas.
+  5. Se um segredo faltar, o workflow **falha com mensagem clara** em vez de fingir que
+     publicou.
+- **Verificação:** execução verde visível no repositório, seguida de deploy novo nos dois
+  serviços sem ninguém apertar nada; e uma execução vermelha provando que a publicação
+  não acontece com teste quebrado.
+- **Critérios:** — · **Commit:** —
+- **Nota:** cobre também o diferencial de integração contínua do enunciado, que estava
+  registrado como `TASK-OPT-02`.
 
 ### TASK-OPT-04 — Redesenho da interface, possivelmente com shadcn/ui
 - **Estado:** ⬜
