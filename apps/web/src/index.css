@@ -1,15 +1,23 @@
 /*
- * Base mínima. O visual real é trabalhado em M5; aqui ficam apenas as regras
- * que já sustentam requisitos: foco visível (S14) e layout fluido (S14).
+ * Estilos base.
+ *
+ * Sem biblioteca de componentes: o enunciado diz que não é necessário design
+ * sofisticado, e CSS próprio evita adicionar uma dependência grande para
+ * telas simples. As regras aqui sustentam requisitos — foco visível e layout
+ * fluido (S14) — não preferência estética.
  */
 
 :root {
   --color-text: #1a1a1a;
+  --color-text-muted: #5c5c5c;
   --color-bg: #ffffff;
+  --color-surface: #f7f7f8;
   --color-border: #d4d4d4;
   --color-primary: #1d4ed8;
+  --color-primary-contrast: #ffffff;
   --color-danger: #b91c1c;
   --spacing: 1rem;
+  --radius: 0.375rem;
 
   color-scheme: light dark;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -33,28 +41,131 @@ body {
   outline-offset: 2px;
 }
 
+/* Primeiro elemento focável da página. Fica fora da tela até receber foco,
+   quando aparece — sem ele, navegar por teclado obriga a percorrer a
+   navegação inteira a cada troca de tela. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10;
+  padding: 0.5rem 1rem;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
 .app__header {
   border-bottom: 1px solid var(--color-border);
   padding: var(--spacing);
 }
 
-.app__header nav {
+.app__header ul {
   display: flex;
-  gap: var(--spacing);
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app__header a {
+  color: var(--color-text);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.app__header a:hover {
+  text-decoration: underline;
+}
+
+/* O item ativo é marcado por peso e borda, não só por cor: quem não distingue
+   as cores precisa de outro sinal. O `aria-current` cobre o leitor de tela. */
+.app__header a.is-active {
+  font-weight: 600;
+  border-bottom-color: var(--color-primary);
 }
 
 .app__main {
   max-width: 70rem;
   margin: 0 auto;
-  padding: var(--spacing);
+  padding: calc(var(--spacing) * 1.5) var(--spacing);
+}
+
+/* O alvo do link de pular não deve mostrar contorno ao receber foco por
+   programação — o contorno ali confunde, já que nada foi selecionado. */
+.app__main:focus {
+  outline: none;
+}
+
+.page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing);
+  margin-bottom: calc(var(--spacing) * 1.5);
+}
+
+.page-heading h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.page-heading__description {
+  margin: 0.25rem 0 0;
+  color: var(--color-text-muted);
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--color-surface);
+}
+
+.button--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+.button--primary:hover {
+  filter: brightness(1.1);
+  background: var(--color-primary);
+}
+
+.button--danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-text: #ededed;
+    --color-text-muted: #a3a3a3;
     --color-bg: #161616;
+    --color-surface: #202020;
     --color-border: #3a3a3a;
     --color-primary: #7aa2ff;
+    --color-primary-contrast: #10203f;
     --color-danger: #f87171;
   }
 }
