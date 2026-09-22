@@ -14,60 +14,60 @@ requisito atualiza a SPEC ou o plano primeiro.
 ## M0 — Fundação
 
 ### TASK-INFRA-01 — PostgreSQL via docker compose
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** `docker-compose.yml` sobe PostgreSQL 16 com volume nomeado, porta e
   credenciais vindas de variáveis com padrão de desenvolvimento.
 - **Verificação:** `docker compose up -d` seguido de `docker compose ps` mostra o
   serviço saudável; `psql` conecta.
-- **Critérios:** S1 · **Commit:** —
+- **Critérios:** S1 · **Commit:** `6449c27`
 
 ### TASK-INFRA-02 — Esqueleto da API
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** `apps/api` com TypeScript `strict`, Fastify, rota `/health` respondendo
   `200`, scripts `dev`, `build`, `typecheck` e `lint`.
 - **Verificação:** `npm run dev` e `curl localhost:3000/health`; `npm run typecheck` limpo.
-- **Critérios:** S1 · **Commit:** —
+- **Critérios:** S1 · **Commit:** `6449c27`
 
 ### TASK-INFRA-03 — Validação de variáveis de ambiente
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** schema Zod cobrindo as variáveis da §9 da SPEC; a aplicação encerra com
   mensagem clara na inicialização se algo faltar ou for inválido, em vez de falhar na
   primeira requisição. Nenhum `process.env` acessado fora desse módulo.
 - **Verificação:** subir sem `WEATHER_API_KEY` produz erro explícito e código de saída
   diferente de zero.
-- **Critérios:** S8 · **Commit:** —
+- **Critérios:** S8 · **Commit:** `6449c27`
 
 ### TASK-INFRA-04 — Logs estruturados com request-id
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** pino configurado; toda requisição loga com identificador correlacionando
   entrada e saída; o identificador volta em cabeçalho de resposta. Nenhum log inclui a
   chave da API de clima.
 - **Verificação:** duas requisições concorrentes produzem identificadores distintos e
   rastreáveis na saída.
-- **Critérios:** S8 · **Commit:** —
+- **Critérios:** S8 · **Commit:** `6449c27`
 
 ### TASK-INFRA-05 — Esqueleto do frontend
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** `apps/web` com Vite, React, TypeScript `strict`, React Router e TanStack
   Query instalados e montados; tela inicial renderiza.
 - **Verificação:** `npm run dev` serve a aplicação; `npm run typecheck` limpo.
-- **Critérios:** — · **Commit:** —
+- **Critérios:** — · **Commit:** `6449c27`
 
 ### TASK-INFRA-06 — Vitest e thresholds de cobertura
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** Vitest nos dois apps com script `test` e `test:coverage`. Thresholds
   conforme §8 da SPEC: 90% de linhas e branches em `modules/**` e no script de
   importação; global medido sem gate; exclusões aplicadas exatamente como listadas.
 - **Verificação:** `npm run test:coverage` executa e **falha** se um arquivo de
   `modules/` for adicionado sem teste — verificado propositalmente uma vez.
-- **Critérios:** S16 · **Commit:** —
+- **Critérios:** S16 · **Commit:** `6449c27`
 
 ### TASK-INFRA-07 — `.env.example` e higiene de segredos
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** `.env.example` com todas as chaves e nenhum valor real; `.env` ignorado
   desde o commit inicial.
 - **Verificação:** `git log -p -- .env` vazio; `git check-ignore -v .env` confirma.
-- **Critérios:** S8 · **Commit:** —
+- **Critérios:** S8 · **Commit:** `6449c27`
 
 ---
 
@@ -393,7 +393,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | — | teste de integração |
 | S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | — | teste de integração |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
-| S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | — | inspeção de repo e respostas |
+| S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial) | redact testado; falta M3 |
 | S9 Cache expira e protege | TASK-WEATHER-02 | — | teste de TTL e stale |
 | S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | — | recarga preserva contexto |
@@ -401,4 +401,4 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | — | provocação manual |
 | S14 Utilizável por teclado | TASK-WEB-08 | — | percurso sem mouse |
 | S15 Executável pelo README | TASK-DOC-02 | — | setup em diretório limpo |
-| S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | — | `npm run test:coverage` |
+| S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27` | gate provado falhando: exit 1 |
