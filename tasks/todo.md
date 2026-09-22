@@ -158,11 +158,11 @@ requisito atualiza a SPEC ou o plano primeiro.
 ## M3 — Integração climática
 
 ### TASK-WEATHER-01 — Cliente da WeatherAPI
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** chamada única ao endpoint de forecast com timeout explícito; resposta
   convertida para o contrato próprio da §6, sem vazar a forma da API externa.
 - **Verificação:** teste com resposta simulada confirma o formato traduzido.
-- **Critérios:** S7 · **Commit:** —
+- **Critérios:** S7 · **Commit:** `1cd6440`
 
 ### TASK-WEATHER-02 — Cache com TTL e `stale-if-error`
 - **Estado:** ⬜
