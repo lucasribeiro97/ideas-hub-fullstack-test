@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import Fastify, { type FastifyInstance } from 'fastify'
 import cors from '@fastify/cors'
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import type { Env } from './lib/env.js'
 import { loggerOptions } from './lib/logger.js'
+import { registrarTratamentoDeErros } from './lib/error-handler.js'
 import { healthRoutes } from './modules/health/health.routes.js'
 
 /**
@@ -21,6 +23,11 @@ export async function buildApp(env: Env): Promise<FastifyInstance> {
     genReqId: () => randomUUID(),
   })
 
+  // Zod valida corpo, params e query das rotas — a mesma biblioteca já usada
+  // para as variáveis de ambiente, e a mesma de onde o OpenAPI será derivado.
+  app.setValidatorCompiler(validatorCompiler)
+  app.setSerializerCompiler(serializerCompiler)
+
   await app.register(cors, { origin: env.CORS_ORIGIN })
 
   // Devolve o identificador ao cliente para que um erro relatado por quem usa
@@ -28,6 +35,8 @@ export async function buildApp(env: Env): Promise<FastifyInstance> {
   app.addHook('onRequest', async (request, reply) => {
     reply.header('x-request-id', request.id)
   })
+
+  registrarTratamentoDeErros(app)
 
   await app.register(healthRoutes)
 
