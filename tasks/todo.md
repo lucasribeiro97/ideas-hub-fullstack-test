@@ -124,10 +124,10 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S4 · **Commit:** `28f5fa7`
 
 ### TASK-API-04 — `GET /users/:id`
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** `200` para existente, `404` para inexistente, `400` para id que não é UUID.
 - **Verificação:** testes dos três casos. `404` e `400` precisam ser distinguíveis.
-- **Critérios:** S6 · **Commit:** —
+- **Critérios:** S6 · **Commit:** `d20c4f5`
 
 ### TASK-API-05 — `GET /users` com busca, ordenação e paginação
 - **Estado:** ⬜
@@ -393,7 +393,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | — | os números fecham |
 | S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7` | 409 na API, inclusive em caixa diferente |
 | S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f` (parcial) | GIN utilizável via EXPLAIN; falta API |
-| S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0` (parcial) | 400/422/404/500 provados; faltam rotas reais |
+| S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial) | provado em rota real no GET; falta DELETE |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial) | redact testado; falta M3 |
 | S9 Cache expira e protege | TASK-WEATHER-02 | — | teste de TTL e stale |
