@@ -72,6 +72,7 @@ O enunciado recomenda uma tabela neste formato; as seções seguintes detalham c
 | Tasks | Corrigir ordem inviável | Notei que provar os status do clima exige a rota existir | **Alterada antes do código**: clima 03 e 04 invertidas | `tasks/todo.md` | Inversão em commit próprio (`94b118e`), anterior à implementação |
 | Implement | Uma tarefa por vez, verificada antes de avançar | Contexto e critério de aceite explícitos a cada tarefa | **Seis rejeições pelo gate de cobertura**, todas apontando código sobrando, não teste faltando | Código e testes | `typecheck`, `lint`, suíte, e execução real contra banco, API ou navegador |
 | Implement | Corrigir índice que não funcionava | Pedi `EXPLAIN ANALYZE` **depois** de aplicar, não antes | **Corrigida pela própria IA após medir**: `.desc()` do Drizzle emitia `DESC NULLS LAST` e o planejador ignorava o índice | `db/schema.ts`, `SPEC.md` §7 | 29 ms para 0,33 ms, medido no banco com 220.875 registros |
+| Deploy | Publicar a demonstração | Blueprint versionado, com os comandos ensaiados localmente antes de publicar | **Quatro restrições da plataforma corrigidas em código**, não contornadas no painel | `render.yaml`, `scripts/copy-migrations.mjs`, `scripts/check-build.mjs` | Aplicação no ar, com os fluxos percorridos no navegador e o tráfego contado |
 | Review | Encontrar o que a suíte não vê | Agente próprio, sem permissão de edição, com reprodução obrigatória por achado | **Sete corrigidos, seis documentados, um contestado**: a probabilidade inflada no relatório da importação | `SPEC.md` §6–§9, `tasks/plan.md` M9, `tasks/todo.md` M9, código e testes | Cada correção revertida para confirmar que a suíte reprova |
 
 ---
@@ -384,6 +385,9 @@ Requisitos mais importantes, do critério ao commit e à verificação.
 | Filtros na URL | `TASK-WEB-03`, `07` | `8c3d710`, `dd855d5` | Ida e volta pela URL; retorno após exclusão preserva a busca |
 | Busca sem disparo por tecla | `TASK-WEB-04` | `6266f2f` | Abort verificado no sinal recebido pelo servidor simulado |
 | Utilizável por teclado | `TASK-WEB-08` | `6d23891` | axe sem violações nos dez estados de tela; fluxos percorridos sem mouse |
+| Pacote compilado aplica migrations | `TASK-DEPLOY-01` | `592c633` | `node dist/db/migrate.js` contra banco descartável, sem `tsx` instalado |
+| Infraestrutura versionada | `TASK-DEPLOY-02` | `c42cce8`, `af6809f`, `a26222a` | `render.yaml` revisável; os quatro comandos ensaiados antes de publicar |
+| Aplicação publicada funciona | `TASK-DEPLOY-02` | — | Onze fluxos percorridos no ambiente no ar, contando as requisições de cada um |
 | Fluxo do frontend | `TASK-WEB-09` | `fb718e4` | Nove percursos sobre API simulada com comportamento real |
 | Tela não faz requisição supérflua nem órfã | — | `bde88c1`, `a224f54` | 14 fluxos percorridos no Chrome contra o log da API: 17 requisições, só os dois erros esperados |
 | Pacote de produção não traz o React de dev | — | `8e7a242` | `bundleType` verificado a cada `npm run build`; guarda provada reintroduzindo a causa |
@@ -582,6 +586,49 @@ O registro de agentes do Claude Code é lido na inicialização da sessão, ent�
 `revisor-codigo` recém-criado não estava disponível como tipo de subagente na sessão em
 que foi escrito. Rodei a varredura embutindo as instruções dele diretamente em cada
 execução. A partir da sessão seguinte, o agente é invocável pelo nome.
+
+---
+
+## Deploy: onde o ensaio local encontra o seu limite
+
+Publicar era diferencial opcional, e o enunciado declara que não é necessário. O valor de
+ter feito não foi o link no ar — foi o que a publicação revelou.
+
+**O que eu fiz antes de publicar.** Ensaiei os quatro comandos do blueprint a partir de um
+clone limpo, contra um banco descartável, com as mesmas variáveis que a plataforma define:
+build da API, migration, `npm start` respondendo `/health`, `/users` e `/docs`, e build do
+frontend com a URL de produção embutida. Tudo passou.
+
+**O que aconteceu mesmo assim.** Quatro obstáculos, nenhum reproduzível aqui:
+
+| Obstáculo | Por que o ensaio não pegaria |
+|---|---|
+| `preDeployCommand` não existe no plano gratuito | É regra de negócio da plataforma, não do código |
+| `NODE_ENV=production` faz o `npm ci` pular as `devDependencies` | A variável que a aplicação precisa quebra o próprio build: 99 pacotes em vez de 454, e `TS7016` no `pg-copy-streams` |
+| O Render não atualiza o comando de build de serviço já criado | O campo fica bloqueado; dois syncs não mudaram nada |
+| Sem conectar o provedor Git, nada é automático | Cada atualização exige sync e deploy manuais |
+
+O segundo é o mais instrutivo, e o diagnóstico quase me escapou: no Render havia um `tsc`
+global, então em vez de "comando não encontrado" o erro apareceu como **falta de tipos**.
+O sintoma apontava para uma dependência ausente; a causa era a variável de ambiente que
+nós mesmos definimos. Só fechou depois de reproduzir localmente com
+`NODE_ENV=production npm ci` e contar os pacotes.
+
+**A lição.** Ensaio valida o que o seu ambiente consegue reproduzir. A plataforma tem
+regras próprias que só aparecem quando ela executa — e tratar o primeiro deploy como
+parte da verificação, e não como formalidade, é o que transforma essas quatro surpresas em
+quatro linhas de documentação.
+
+**O que a publicação confirmou que o local não confirmaria.** Os três defeitos que o uso
+manual havia revelado foram reexercitados no ar, e o do CORS numa condição mais exigente
+que a original: entre dois domínios distintos, em vez de duas portas do mesmo `localhost`.
+Nenhum reapareceu.
+
+**Onde parei.** Não criei conta, não autorizei o acesso do Render ao repositório por OAuth
+e não preenchi a chave da WeatherAPI — chave de API é credencial. Conduzi a criação do
+blueprint pela URL do repositório público, preenchi as variáveis que não são segredo, e o
+restante foi feito por quem é dono da conta. A senha do banco hospedado nunca passou por
+comando meu; a importação dos dados foi executada por ele, com a variável inline.
 
 ---
 

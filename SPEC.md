@@ -433,7 +433,12 @@ A regra prática: **o que o compilador lê é inglês; o que uma pessoa lê é p
 ## 12. Limites e não-objetivos
 
 - **Sem autenticação** — explicitamente fora de escopo.
-- Sem deploy, Kubernetes, filas ou microsserviços.
+- Sem Kubernetes, filas ou microsserviços.
+- **Deploy de demonstração existe, mas não é objetivo do projeto.** O enunciado o lista
+  como diferencial opcional e declara que publicar não é necessário. A instância no
+  Render usa plano gratuito, com banco que expira e serviço que hiberna; ela ilustra a
+  aplicação, e não substitui a execução local descrita no README. A infraestrutura é
+  descrita em `render.yaml`, versionado.
 - Cache apenas em memória; reiniciar a API esvazia o cache, o que é aceito.
 - Sem internacionalização; a interface é em português.
 - Sem soft delete: `DELETE` remove o registro.

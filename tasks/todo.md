@@ -404,7 +404,7 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S1, S15 · **Commit:** `592c633`
 
 ### TASK-DEPLOY-02 — Blueprint do Render versionado
-- **Estado:** 🟡 preparado, aguardando publicação
+- **Estado:** ✅
 - **Aceite:**
   1. `render.yaml` na raiz descrevendo os três recursos: Postgres 16, a API como Web
      Service e o frontend como Static Site.
@@ -428,10 +428,14 @@ requisito atualiza a SPEC ou o plano primeiro.
   API, migration, `npm start` respondendo `/health`, `/users` e `/docs` com log em JSON,
   e build do frontend com a URL de produção embutida e `localhost` ausente. A chave da
   WeatherAPI foi conferida ausente da resposta de `/weather/:city`.
-  **Publicado:** blueprint `ideas-hub` criado, três recursos provisionados, migrations
-  aplicadas no Postgres hospedado. Falta apenas a `WEATHER_API_KEY`, que é credencial e
-  precisa ser preenchida por quem é dono da conta. Quatro restrições da plataforma que
-  nenhum ensaio local revelaria estão documentadas no README.
+  **Publicado e verificado no ar:** listagem com 41.259 usuários e 2.063 páginas; busca
+  com 8 teclas gerando 1 requisição; ordenação e paginação refletidas na URL; validação
+  do formulário sem tocar na rede; cadastro e edição em `POST 201` + `PATCH 200`, sem
+  busca redundante; email duplicado com caixa trocada em `409` no campo certo; exclusão
+  em `DELETE 204` sem requisição órfã; clima com temperatura, umidade, condição e gráfico
+  traçado. Os três defeitos encontrados no uso manual não reapareceram — o do CORS foi
+  exercitado numa condição mais exigente que a original, entre dois domínios distintos.
+  Quatro restrições da plataforma que nenhum ensaio local revelaria estão no README.
 - **Critérios:** — · **Commit:** `592c633`
 - **Nota:** diferencial opcional do enunciado ("deploy de demonstração"), que declara
   explicitamente não ser necessário publicar. O plano gratuito do Render hiberna o
@@ -597,3 +601,5 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S20 Importações simultâneas não se corrompem | TASK-REV-07 | `badc88c` | segunda execução recusada com erro reconhecível |
 | S21 Exceção de render não apaga a aplicação | TASK-REV-09 | `badc88c` | data inválida: alerta exibido, navegação preservada |
 | S22 Pacote de produção com o React correto | TASK-REV-02 | `8e7a242` | `bundleType` verificado a cada build |
+| Pacote compilado aplica migrations | TASK-DEPLOY-01 | `592c633` | `node dist/db/migrate.js` contra banco descartável, sem `tsx` |
+| Infraestrutura versionada e publicada | TASK-DEPLOY-02 | `592c633`, `c42cce8`, `af6809f`, `a26222a` | aplicação no ar, com os fluxos percorridos no navegador |

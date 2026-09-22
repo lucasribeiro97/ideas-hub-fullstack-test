@@ -244,6 +244,28 @@ revisor apagou um registro real do banco de desenvolvimento ao testar o `DELETE`
 que presumiu inexistente. Mitigação aplicada depois do fato: escrita apenas em banco
 descartável, registrada na definição do agente.
 
+## M10 — Deploy de demonstração (acrescentado após o M9)
+
+Diferencial opcional do enunciado, que declara explicitamente não ser necessário
+publicar. Registrado **antes** da implementação, ao contrário do M9.
+
+**Escopo.** Tornar o pacote compilado autossuficiente; descrever a infraestrutura em
+`render.yaml` versionado; publicar; verificar a aplicação no ar.
+
+**Checkpoint.** Os comandos do blueprint ensaiados localmente antes de publicar, contra
+banco descartável e com as variáveis que a plataforma define.
+
+**Risco novo (R11): o ensaio local não reproduz as regras da plataforma.**
+Materializou-se quatro vezes — `preDeployCommand` indisponível no plano gratuito,
+`NODE_ENV` fazendo o npm pular as dependências do próprio build, comando de build
+imutável em serviço já criado, e ausência de automação sem conexão Git. Mitigação: tratar
+o primeiro deploy como parte da verificação, não como formalidade, e registrar cada
+restrição encontrada.
+
+**Risco novo (R12): a demonstração vira a forma principal de avaliar.** O plano gratuito
+hiberna e o banco expira em 30 dias. Mitigação: o README apresenta o link como
+complemento, com as duas ressalvas visíveis antes do endereço.
+
 ## 6. Rastreabilidade
 
 A tabela requisito → tarefa → commit → verificação é mantida em

@@ -10,8 +10,31 @@ serviço externo de informações climáticas.
 - 220.875 usuários importados do CSV de origem, a partir de 500 mil linhas
 - Contrato documentado em OpenAPI, servido pelo Swagger UI
 
+## Demonstração no ar
+
+| | |
+|---|---|
+| **Aplicação** | https://ideas-hub-web.onrender.com |
+| **API** | https://ideas-hub-api.onrender.com |
+| **Contrato (Swagger UI)** | https://ideas-hub-api.onrender.com/docs |
+
+> **O primeiro acesso demora.** O plano gratuito do Render hiberna o serviço após
+> inatividade, e a instância leva cerca de 50 segundos para responder de novo. Não é
+> lentidão da aplicação.
+>
+> **O banco expira em 22 de outubro de 2026**, por ser gratuito. O repositório não —
+> a avaliação não depende do link estar no ar.
+>
+> A demonstração tem **41.259 usuários**, importados das primeiras 50 mil linhas do
+> CSV. O volume completo não cabe no plano gratuito: os 220.875 registros locais ocupam
+> 179 MB, dos quais 120 MB são os índices GIN de trigrama, contra um limite de 0,5 GB.
+
+O procedimento de publicação, as restrições da plataforma e o que foi verificado estão
+em [Deploy de demonstração](#deploy-de-demonstração).
+
 ## Índice
 
+- [Demonstração no ar](#demonstração-no-ar)
 - [Pré-requisitos](#pré-requisitos)
 - [Executando pela primeira vez](#executando-pela-primeira-vez)
 - [Importando o CSV de origem](#importando-o-csv-de-origem)
