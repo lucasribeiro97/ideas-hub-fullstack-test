@@ -39,8 +39,16 @@ export const users = pgTable(
     index('users_name_trgm_idx').using('gin', sql`${table.name} gin_trgm_ops`),
     index('users_email_trgm_idx').using('gin', sql`${table.email} gin_trgm_ops`),
 
-    // Sustenta a ordenação padrão da listagem.
-    index('users_created_at_desc_idx').on(table.createdAt.desc()),
+    // Sustenta a ordenação padrão da listagem, incluindo o desempate por id.
+    // Composto e não de coluna única: medido com 220 mil registros, a versão
+    // simples fazia o planner descartar o índice e ordenar a tabela inteira
+    // (SPEC §7).
+    // Escrito em SQL literal de propósito. O `.desc()` do Drizzle emite
+    // `DESC NULLS LAST`, enquanto `ORDER BY created_at DESC` significa
+    // `NULLS FIRST` — o padrão do PostgreSQL para ordem decrescente. A
+    // divergência faz o planner ignorar o índice em silêncio: a migration
+    // aplica, o índice existe, e a consulta segue varrendo a tabela inteira.
+    index('users_created_at_id_idx').using('btree', sql`${table.createdAt} DESC`, sql`${table.id}`),
   ],
 )
 
