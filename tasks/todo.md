@@ -199,12 +199,12 @@ requisito atualiza a SPEC ou o plano primeiro.
 ## M4 — Importação em massa
 
 ### TASK-IMPORT-01 — Parser em streaming com numeração de linha
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** leitura em streaming sem carregar o arquivo em memória; cada registro
   carrega seu número de linha; validação por registro acumulando motivo de rejeição.
 - **Verificação:** importar um arquivo grande mantém uso de memória estável — observado
   durante a execução de 500k.
-- **Critérios:** S3 · **Commit:** —
+- **Critérios:** S3 · **Commit:** `43fa84a`
 
 ### TASK-IMPORT-02 — Carga para tabela de staging via `COPY`
 - **Estado:** ⬜
