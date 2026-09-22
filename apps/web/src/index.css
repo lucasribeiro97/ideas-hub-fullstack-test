@@ -364,3 +364,50 @@ tbody tr:last-child td {
     transition: none;
   }
 }
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing);
+  max-width: 34rem;
+}
+
+.user-form .field {
+  flex: 1 1 auto;
+}
+
+.field__optional {
+  color: var(--color-text-muted);
+  font-weight: normal;
+}
+
+/* A mensagem de erro não depende só da cor: vem com texto próprio, ligada ao
+   campo por aria-describedby. */
+.field__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+.field input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.form__note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.form__general-error {
+  margin: 0 0 var(--spacing);
+  padding: 0.75rem;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius);
+  color: var(--color-danger);
+}
+
+.form__actions {
+  display: flex;
+  gap: 0.5rem;
+}
