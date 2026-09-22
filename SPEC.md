@@ -209,8 +209,37 @@ Os cenários obrigatórios do enunciado são testados contra **Postgres real**, 
 mocks: rejeição de email duplicado é comportamento de constraint, e simulá-la testaria
 apenas o simulador.
 
-Não há meta de cobertura percentual. A prioridade é cobrir regras que, se quebradas,
-produzem dado incorreto.
+### Cobertura
+
+O enunciado não exige meta percentual e avalia a relevância dos cenários. Ainda assim
+adotamos um threshold **seletivo**, porque cobertura é o instrumento mais eficiente para
+detectar um caminho de código que nenhum teste executa — risco concreto num projeto com
+filtros, ordenação, paginação e quatro modos de falha da API externa.
+
+| Alvo | Política |
+|---|---|
+| `apps/api/src/modules/**` | Gate de **90%** (linhas e branches). Falha o build abaixo disso |
+| `apps/api/src/scripts/import*` | Gate de **90%**. Regra de deduplicação e rejeição mora aqui |
+| Cobertura global (api e web) | **Medida e publicada**, sem gate |
+
+Excluídos do denominador, com o motivo:
+
+| Excluído | Por quê |
+|---|---|
+| `src/db/migrations/**` | Schema versionado, verificado pela aplicação da migration em si |
+| `drizzle.config.ts`, `vite.config.ts` | Configuração declarativa, sem lógica |
+| `src/server.ts` (bootstrap) | Wiring de inicialização, exercitado indiretamente pelos testes de integração |
+| `src/main.tsx`, providers do React | Montagem da árvore, sem regra de negócio |
+
+A exclusão é listada aqui de forma explícita: exclusão documentada é decisão de escopo,
+exclusão silenciosa é maquiagem de métrica.
+
+**Limite consciente da métrica.** Cobertura mede linha executada, não asserção feita —
+um teste que renderiza sem verificar nada cobre 100% do arquivo e não detecta regressão
+alguma. Esse atalho é o caminho de menor resistência quando testes são gerados por IA.
+Por isso o threshold vale apenas onde há regra de negócio, e a revisão dos testes
+verifica se cada um afirma comportamento observável, não apenas se o código rodou. O
+percentual é evidência de que a verificação existe, não prova de que ela é boa.
 
 ## 9. Variáveis de ambiente
 
@@ -242,6 +271,7 @@ Consolidados no README ao final; a forma pretendida é:
 | Rodar a API | `npm run dev` (em `apps/api`) |
 | Rodar o front | `npm run dev` (em `apps/web`) |
 | Testes | `npm test` (em cada app) |
+| Testes com cobertura | `npm run test:coverage` (em cada app) |
 
 ## 11. Convenções
 
@@ -283,6 +313,7 @@ Verificáveis, um a um.
 | S13 | Estados de carregamento, vazio e erro | Presentes nas telas de usuários e clima |
 | S14 | Utilizável por teclado | Navegação e submissão de formulário sem mouse |
 | S15 | Executável a partir do README | Setup limpo seguindo apenas o documento |
+| S16 | Cobertura de 90% na regra de negócio | `npm run test:coverage` falha se `modules/**` ou o script de importação ficarem abaixo de 90% de linhas e branches |
 
 ## 14. Questões em aberto
 
