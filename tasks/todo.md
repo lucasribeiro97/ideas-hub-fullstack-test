@@ -165,13 +165,13 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S7 · **Commit:** `1cd6440`
 
 ### TASK-WEATHER-02 — Cache com TTL e `stale-if-error`
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** mapa em memória por cidade normalizada, TTL configurável com padrão de
   10 minutos. Falha da origem com entrada expirada em mãos devolve o dado antigo com
   `stale: true` em vez de erro.
 - **Verificação:** teste comprova reaproveitamento dentro do TTL (uma chamada à origem),
   expiração após o TTL e resposta `stale` quando a origem falha.
-- **Critérios:** S9 · **Commit:** —
+- **Critérios:** S9 · **Commit:** `958a3ed`
 
 ### TASK-WEATHER-03 — Tratamento das falhas externas
 - **Estado:** ⬜
@@ -396,7 +396,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial), `b05d640` | provado nos cinco endpoints de usuários |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial) | redact testado; falta M3 |
-| S9 Cache expira e protege | TASK-WEATHER-02 | — | teste de TTL e stale |
+| S9 Cache expira e protege | TASK-WEATHER-02 | `958a3ed` | TTL, expiração e stale-if-error testados |
 | S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | — | recarga preserva contexto |
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | — | inspeção da aba de rede |
