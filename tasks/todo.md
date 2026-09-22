@@ -91,10 +91,9 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Estado:** ✅
 - **Aceite:** `CREATE EXTENSION pg_trgm`; índices GIN trigram em `name` e `email`;
   btree em `created_at DESC`.
-- **Verificação:** `EXPLAIN` de um `ILIKE '%termo%'` usa o índice GIN e não varredura
-  sequencial. **Parcial:** com `enable_seqscan=off` o plano usa `Bitmap Index Scan` nos
-  dois índices GIN, provando que são utilizáveis. A escolha espontânea do planner só é
-  verificável com volume, no M4.
+- **Verificação:** ✅ **Completa.** Com 220.875 registros reais importados, o planner
+  escolhe `Bitmap Index Scan` nos dois índices GIN **espontaneamente**, sem
+  `enable_seqscan=off`. Verificado em `f23e16b`.
 - **Critérios:** S5 · **Commit:** `4e80b2f`
 
 ---
@@ -214,13 +213,13 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S2 · **Commit:** `cba066d`
 
 ### TASK-IMPORT-03 — Deduplicação determinística
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** `INSERT … SELECT DISTINCT ON (lower(email)) … ORDER BY lower(email),
   line_no ON CONFLICT DO NOTHING`. Vence a primeira ocorrência no arquivo (premissa P3).
   Reexecutar não duplica nem altera o resultado.
 - **Verificação:** fixture com o mesmo email em três linhas e nomes diferentes importa
   o nome da **primeira**; segunda execução não altera contagem nem conteúdo.
-- **Critérios:** S2 · **Commit:** —
+- **Critérios:** S2 · **Commit:** `f23e16b`
 
 ### TASK-IMPORT-04 — Relatório e flag `--limit`
 - **Estado:** ⬜
@@ -397,7 +396,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | Critério | Tarefas | Commit | Verificação |
 |---|---|---|---|
 | S1 Banco e migrations | TASK-INFRA-01, TASK-INFRA-02, TASK-DB-01 | `6449c27`, `4e80b2f` | migration em base vazia + reexecução |
-| S2 Importação reproduzível | TASK-IMPORT-02, TASK-IMPORT-03, TASK-IMPORT-05 | — | dupla execução idêntica |
+| S2 Importação reproduzível | TASK-IMPORT-02, TASK-IMPORT-03, TASK-IMPORT-05 | `cba066d`, `f23e16b` | dupla execução não insere nem altera |
 | S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | — | os números fecham |
 | S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7`, `bcf8bf8` | 409 no POST e no PATCH, inclusive em caixa diferente |
 | S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f`, `761017d` | 22 testes na API; uso espontâneo do GIN só com volume, no M4 |
