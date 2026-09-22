@@ -27,10 +27,28 @@ export default tseslint.config(
       '@typescript-eslint/require-await': 'off',
     },
   },
-  // Arquivos de configuração em JS ficam fora do projeto TypeScript, então as
-  // regras que exigem informação de tipo não se aplicam a eles.
+  // JavaScript fora do projeto TypeScript: arquivos de configuração e os
+  // scripts de build em `scripts/`. As regras que exigem informação de tipo não
+  // se aplicam a eles, e tentar aplicá-las quebra a análise com
+  // "was not found by the project service".
+  //
+  // O `.mjs` precisa estar aqui junto do `.js`: o padrão anterior cobria só o
+  // segundo, e os dois scripts de build entraram como `.mjs` — a falha apareceu
+  // na integração contínua, não aqui, porque eu não rodei o lint depois de
+  // criá-los.
   {
-    files: ['**/*.js'],
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
     extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: {
+      // Sem os tipos do TypeScript, o ESLint não sabe que estes arquivos rodam
+      // no Node e acusa `console`, `process` e `URL` como indefinidos. A lista
+      // é explícita, e não o pacote `globals`, para não acrescentar dependência
+      // por causa de três nomes.
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        URL: 'readonly',
+      },
+    },
   },
 )
