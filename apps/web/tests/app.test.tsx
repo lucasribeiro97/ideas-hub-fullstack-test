@@ -8,9 +8,13 @@ import { apiServer } from './helpers/api-server'
 import { currentUsers, installFakeApi, seedUsers } from './helpers/fake-api'
 
 /*
- * Este arquivo era o único dos treze sem `apiServer.listen`.
+ * Este arquivo montava a aplicação inteira sem instalar o servidor simulado.
  *
- * A consequência não era um teste frágil: era um teste que falava com a API e
+ * Outros dois arquivos também não chamam `apiServer.listen` — mas são testes de
+ * unidade, que exercitam função pura e componente isolado e não tocam a rede.
+ * Aqui o `<App />` inteiro é montado, então a omissão tinha consequência.
+ *
+ * E a consequência não era um teste frágil: era um teste que falava com a API e
  * com o banco reais da máquina de quem rodasse. A garantia de
  * `onUnhandledRequest: 'error'` que a SPEC §8 apresenta como válida para a
  * suíte inteira não valia aqui. A revisão provou instalando um servidor que

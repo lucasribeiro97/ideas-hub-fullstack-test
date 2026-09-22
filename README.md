@@ -390,9 +390,11 @@ proibitivo **não se materializou** nesse volume.
 ## Limitações conhecidas
 
 As entradas abaixo marcadas com **[revisão]** vieram de uma varredura adversarial do
-código feita por agentes de IA especializados, cada achado com reprodução executada. As
-de severidade alta foram corrigidas; estas são as que ficaram, com o custo medido e a
-razão de terem ficado.
+código feita por um agente revisor próprio, em seis frentes paralelas, cada achado com
+reprodução executada. As de severidade alta foram corrigidas; estas são as que ficaram,
+com o custo medido e a razão de terem ficado. O processo está descrito em
+[`AI_USAGE.md`](./AI_USAGE.md#review-agente-revisor-próprio), e a definição do agente em
+[`.claude/agents/revisor-codigo.md`](./.claude/agents/revisor-codigo.md).
 
 **`sort=name` e `sort=email` não têm índice.** [revisão] A tabela de índices da SPEC §7
 documenta apenas o de `created_at`, e a interface oferece as três colunas como

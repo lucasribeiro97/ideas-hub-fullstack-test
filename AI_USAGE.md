@@ -39,6 +39,9 @@ Recursos equivalentes também utilizados, nativos da ferramenta:
   testes, migrations, `EXPLAIN ANALYZE`, medições de tempo e memória.
 - **Edição de arquivos com leitura obrigatória prévia** — impede sobrescrever algo que
   não foi lido.
+- **Subagentes com contexto separado** — usados na fase de revisão. Um agente próprio,
+  versionado em `.claude/agents/revisor-codigo.md`, com ferramentas restritas à leitura
+  e execução. Detalhes na seção [Review](#review-agente-revisor-próprio).
 
 ## Em que etapas a IA foi utilizada
 
@@ -49,7 +52,7 @@ Recursos equivalentes também utilizados, nativos da ferramenta:
 | Plan | Marcos, riscos e checkpoints |
 | Tasks | Decomposição em tarefas com critério de aceite |
 | Implement | Escrita de código e testes, tarefa a tarefa |
-| Review | Verificação em navegador, medições, testes de instalação do zero |
+| Review | Verificação em navegador, medições, testes de instalação do zero, e varredura adversarial por subagente revisor |
 | Documentação | README, OpenAPI e este registro |
 
 ---
@@ -240,6 +243,8 @@ Nenhuma implementação foi aceita por parecer correta.
 | **Auditoria do tráfego no navegador** | O que cada tela pede à API, contado no log do servidor — encontrou três defeitos que a suíte não via |
 | **Instrumentação do `fetch` na página** | O que o navegador dispara e cancela, que o log do servidor não registra — encontrou o quarto |
 | **Inspeção do pacote gerado** | Que o `npm run build` publicava o React de desenvolvimento |
+| **Subagente revisor em seis frentes** | O que um contexto limpo enxerga no código pronto — 37 achados distintos, todos com reprodução executada |
+| **Mutação deliberada do código** | Se o teste que passa pegaria o defeito: reverter a correção e exigir que a suíte reprove |
 
 ### Três achados que só a verificação produziu
 
@@ -258,7 +263,7 @@ cancelamento virava erro visível na tela — o oposto do requisito.
 
 ### O limite mais caro que encontrei: verificar o resultado não é verificar o caminho
 
-Os defeitos abaixo escaparam de 553 testes. Nenhum foi sorte: os três primeiros têm a
+Os defeitos abaixo escaparam de 553 testes (hoje são 606). Nenhum foi sorte: os três primeiros têm a
 mesma causa, e a causa é minha.
 
 **CORS bloqueando `PATCH` e `DELETE`.** O padrão do `@fastify/cors` libera apenas `GET`,
@@ -362,12 +367,175 @@ Requisitos mais importantes, do critério ao commit e à verificação.
 | Utilizável por teclado | `TASK-WEB-08` | `6d23891` | axe sem violações em sete telas; fluxos percorridos sem mouse |
 | Fluxo do frontend | `TASK-WEB-09` | `fb718e4` | Nove percursos sobre API simulada com comportamento real |
 | Tela não faz requisição supérflua nem órfã | — | `bde88c1`, `a224f54` | 14 fluxos percorridos no Chrome contra o log da API: 17 requisições, só os dois erros esperados |
+| Pacote de produção não traz o React de dev | — | `8e7a242` | `bundleType` verificado a cada `npm run build`; guarda provada reintroduzindo a causa |
+| Falha de conexão não derruba o processo | — | `badc88c` | Conexão derrubada por `pg_terminate_backend`; sem o ouvinte o processo morria |
+| Requisição não pede trabalho ilimitado | — | `badc88c` | Teto de `page` no contrato publicado, mais tempo limite de consulta verificado na conexão |
+| Importação não corre contra si mesma | — | `badc88c` | Duas execuções simultâneas: uma conclui, a outra é recusada com erro reconhecível |
+| Linha defeituosa não derruba a importação | — | `badc88c` | Byte NUL rejeitado com motivo, demais linhas gravadas, contagens fechando |
+| Cota da origem climática é distinguível | — | `badc88c` | `403` com código `2007` da tabela oficial vira `429`, não `502` |
+| Exceção de render não apaga a aplicação | — | `badc88c` | Data inválida vinda da API: alerta exibido, navegação preservada, erro no console |
+| Gráfico é exercitado pela suíte | — | `badc88c` | Remover o `ResponsiveContainer` reprova seis casos; antes mantinha 231 verdes |
 | Contrato documentado | `TASK-DOC-01` | `914baf6` | Seis endpoints no Swagger; exemplos executados conferem |
-| Executável pelo README | `TASK-DOC-02` | `f1b1065` | Clone novo em diretório limpo: 553 testes passam |
+| Executável pelo README | `TASK-DOC-02` | `f1b1065` | Clone novo em diretório limpo: 553 testes passam (606 após a revisão) |
 | Cobertura no domínio | `TASK-INFRA-06` | `6449c27` | Gate provado **falhando** de propósito, com código de saída 1 |
 
 O histórico completo distingue as fases por prefixo: `spec:`, `plan:`, `tasks:`,
 `feat:`, `test:`, `refactor:`, `docs:`, `fix:`.
+
+---
+
+## Review: agente revisor próprio
+
+Depois de o código estar pronto, montei um **subagente revisor** e o rodei contra a API e
+o frontend. É um mecanismo diferente das skills: as duas skills usadas são distribuídas
+com a ferramenta e carregam instruções para uma tarefa; o revisor é uma definição que eu
+escrevi, versionada em [`.claude/agents/revisor-codigo.md`](./.claude/agents/revisor-codigo.md),
+que roda em contexto separado do meu.
+
+**Por que um agente separado, e não pedir "revise o código" na mesma conversa.** Quem
+escreveu o código carrega o raciocínio que o justificou. Um contexto limpo lê o que está
+escrito, não o que se quis escrever. E o revisor não compartilha o meu histórico de
+decisões — ele não sabe quais trade-offs eu já tinha aceitado, então questiona os que eu
+teria pulado.
+
+### As três decisões de desenho, e o que cada uma responde
+
+**O revisor não edita.** Só `Read`, `Grep`, `Glob` e `Bash`. Quem corrige perde o
+incentivo de reportar o que não sabe corrigir, e a revisão vira lista de coisas fáceis.
+
+**Achado sem reprodução é palpite.** Cada achado exige um comando executado — `curl`,
+`psql`, `EXPLAIN ANALYZE`, um teste escrito e rodado — ou o caminho de código rastreado
+com arquivo e linha em cada salto. Sem isso, sai marcado `NÃO VERIFICADO` com a frase do
+que faltou, nunca como fato. Essa regra é o contrapeso direto da lição deste projeto:
+meus testes erravam afirmando sobre o resultado, e um revisor de IA solto erra na direção
+oposta, produzindo problemas plausíveis que não existem.
+
+**As decisões já documentadas entram no prompt.** Sem autenticação, paginação por offset,
+tipos duplicados no front, `VITE_*` público. Sem essa lista o relatório se gastaria
+redescobrindo o que a SPEC já justifica, e o ruído esconderia o sinal. Elas só podem ser
+contestadas com evidência nova.
+
+### Como rodei
+
+Seis frentes em paralelo, cada uma com escopo fechado e dados de teste com prefixo
+próprio: entrada e SQL do módulo de usuários; infraestrutura e segurança; clima; script
+de importação; camada de dados do frontend; telas e suíte de testes.
+
+**Resultado: 41 achados relatados, 37 distintos**, todos com reprodução executada.
+
+| Frente | Crítico | Alto | Médio | Baixo |
+|---|---:|---:|---:|---:|
+| Entrada e SQL do módulo de usuários | 0 | 1 | 2 | 1 |
+| Infraestrutura e segurança | 0 | 2 | 2 | 3 |
+| Integração climática | 0 | 2 | 3 | 2 |
+| Importação do CSV | 1 | 2 | 4 | 2 |
+| Contrato e camada de dados do front | 0 | 1 | 2 | 3 |
+| Telas e suíte de testes | 0 | 3 | 4 | 1 |
+
+Quatro defeitos foram encontrados por **duas frentes independentes** cada, por caminhos
+diferentes: `page=1e21` virando tela de erro, a página fora da faixa mostrando "nenhum
+usuário cadastrado", a ausência de coalescência no clima, e o `maxParamLength` do Fastify
+quebrando o envelope de erro. A corroboração cruzada é o que mais eleva a confiança num
+achado — nenhuma das duas frentes sabia o que a outra estava olhando.
+
+Verifiquei por conta própria os estruturais antes de agir sobre eles — a mesma regra que
+impus ao revisor vale para mim ao repassá-los. Dois números que eu mesmo repassei errados
+durante a varredura e corrigi depois de conferir: o total de achados, que eu havia
+arredondado para 33, e a afirmação de que `app.test.tsx` era o único arquivo sem servidor
+simulado.
+
+### O que a revisão encontrou que eu não teria encontrado
+
+Três achados desta categoria, porque exigiram sair do código e ir ao ambiente:
+
+> **O processo inteiro morria com uma conexão ociosa.** `createDatabase` não registrava
+> `pool.on('error')`. O `pg-pool` emite `'error'` no pool quando um cliente ocioso falha
+> — não há requisição em andamento para receber a exceção —, e sem ouvinte o Node
+> converte em exceção não capturada. Reinício do Postgres, failover ou
+> `pg_terminate_backend` derrubavam a API, não a requisição. Reproduzido subindo a API
+> com `idle_session_timeout=3s`: respondeu `200`, e seis segundos depois estava morta.
+
+> **`page` sem teto degradava a API inteira.** `perPage` tinha limite, e a SPEC o
+> justifica dizendo que "mantém a latência previsível" — mas o `OFFSET` não tinha limite
+> nenhum. Medido: `Sort Method: external merge Disk: 22408kB`, 330 ms por requisição, e
+> com 200 chamadas simultâneas uma listagem comum passou de 12 ms para **9,3 s**. Tudo
+> respondendo `200`, então invisível a qualquer alarme de erro.
+
+> **A cota da WeatherAPI era classificada errado, e o teste escondia.** A tabela oficial
+> mapeia cota esgotada para **HTTP 403 com `code: 2007`** — a WeatherAPI não usa 429 em
+> lugar nenhum. Nosso `translateUpstreamFailure` lia só o status, então o modo de falha
+> mais provável deste projeto virava `502 "serviço indisponível"`. E o helper de teste
+> fabricava um `429` que o fornecedor nunca envia: **o simulador definia a realidade que
+> ele mesmo conferia.** Só apareceu porque o revisor foi ler a documentação da origem.
+
+### O diagnóstico que três frentes independentes alcançaram
+
+Vindas de caminhos diferentes, três chegaram à mesma conclusão: **os testes verificavam
+o simulador, não a realidade.**
+
+- O mock do clima inventava um status que a origem não usa.
+- O helper de lentidão fazia `delay` **antes** de montar a resposta, então só exercitava
+  a lentidão de cabeçalho — o caso que já funcionava. A lentidão no corpo, que é o modo
+  real de degradação de um terceiro, virava `502` em vez de `504`.
+- `tests/app.test.tsx` montava a aplicação inteira — e portanto disparava requisições —
+  sem instalar o servidor simulado. Outros dois arquivos também não chamavam
+  `apiServer.listen`, mas são testes de unidade que não tocam a rede; este era o único em
+  que a omissão importava. A garantia de `onUnhandledRequest: 'error'` que eu apresento
+  na SPEC §8 como válida para a suíte não valia ali: os testes falavam com a API e o
+  banco reais. Provado com um sniffer, e depois capturando
+  `1–20 de 220.873 · página 1 de 11.044` vindo do banco local.
+- **Apagar o gráfico de temperatura por completo mantinha os 231 testes verdes.** Em
+  jsdom o `ResponsiveContainer` media zero e o Recharts não emitia elemento algum, então
+  `dataKey`, domínio do eixo, formatador e série nunca executavam. Os sete casos do
+  arquivo afirmavam sobre o resumo em texto e a tabela em `<details>` — ambos
+  independentes do gráfico.
+
+É a mesma doença dos três defeitos que o uso manual revelou, um nível mais fundo.
+
+### O que corrigi, e o que deixei documentado
+
+Corrigi os sete de maior severidade: os três acima, mais o byte NUL que abortava a
+importação inteira e virava `500` na API, a corrida entre importações simultâneas, a
+ausência de `ErrorBoundary` (uma exceção de render apagava a aplicação), e a cobertura
+real do gráfico e das rotas.
+
+**Cada correção foi aceita só depois de reverter o código e confirmar que os testes
+reprovam.** A mutação que antes mantinha 231 testes verdes hoje reprova seis casos.
+
+Os seis achados de severidade média foram para as limitações conhecidas do README,
+marcados `[revisão]`, com o custo medido e a razão de não terem sido corrigidos —
+`sort=name`/`email` sem índice, `HOST=0.0.0.0`, `params` do Drizzle no log, ausência de
+coalescência no clima, origem lenta classificada como indisponibilidade, e importação
+interrompida que commita mesmo assim. Para um teste técnico, registrar o custo medido
+vale mais que corrigir tudo às pressas.
+
+### Três coisas que não saíram como planejado
+
+**Um revisor apagou um registro real do banco de desenvolvimento.** A instrução dizia
+"não apague registros que você não criou"; ele testou o `DELETE` de um id que **presumiu**
+inexistente, e o UUID — vindo de um fixture de teste — existia. O total caiu de 220.874
+para 220.873. A presunção é o defeito: não se sabe o que existe até verificar, e
+verificar antes de cada escrita é mais frágil que não escrever no banco alheio. A
+definição do agente foi endurecida para **escrita só em banco descartável**.
+
+**O revisor superestimou a probabilidade de um achado.** O relatório da importação
+classificava como "caso mais provável" rodar o mesmo comando duas vezes. Não procede: com
+o mesmo arquivo, o dado gravado é o mesmo, então não há perda de conteúdo — só contagem
+errada. A perda real exige dois arquivos diferentes com totais coincidentes, bem menos
+provável. O defeito é real e os dois modos de falha foram reproduzidos pela linha de
+comando; a probabilidade é que estava inflada no texto.
+
+**Dos quatro testes que escrevi para a corrida da importação, só um é regressão de
+verdade.** Ao reverter o lock, apenas o caso que exige uma recusa reconhecível reprova —
+os outros três guardam o ciclo de vida do lock. A corrida depende de temporização, que é
+justamente o que a torna perigosa e o que impede um teste determinístico simples.
+
+### Limitação do mecanismo
+
+O registro de agentes do Claude Code é lido na inicialização da sessão, então o
+`revisor-codigo` recém-criado não estava disponível como tipo de subagente na sessão em
+que foi escrito. Rodei a varredura embutindo as instruções dele diretamente em cada
+execução. A partir da sessão seguinte, o agente é invocável pelo nome.
 
 ---
 
@@ -396,6 +564,18 @@ sucesso" e não teve efeito nenhum. Foi medir de novo depois de aplicar que reve
 concluir que o frontend estava no ar — era **outro projeto** ocupando a porta. Passei a
 conferir o `<title>` do HTML.
 
+**Ela presume o estado do ambiente em vez de verificá-lo.** Um dos revisores apagou um
+registro real do banco de desenvolvimento testando o `DELETE` de um id que supôs
+inexistente. A instrução proibia apagar o que não fosse dele; o que faltava era a
+proibição de escrever no banco alheio, porque a presunção sobre o estado é anterior à
+regra sobre a ação.
+
+**Ela infla a gravidade do que encontra.** O relatório da importação apresentou como
+"caso mais provável" um cenário que, analisado, não causa perda de dado. O defeito era
+real e estava reproduzido; a probabilidade é que vinha exagerada. Um revisor de IA
+inclina para o alarme, e o texto dele precisa ser lido com a mesma desconfiança aplicada
+ao código.
+
 ## Onde preferi não usar IA
 
 **Decisões de produto e de escopo.** Estrutura do repositório, stack, granularidade das
@@ -416,6 +596,7 @@ a IA decidir em silêncio.
 ## Documentos relacionados
 
 - [`README.md`](./README.md) — execução, decisões e limitações
+- [`.claude/agents/revisor-codigo.md`](./.claude/agents/revisor-codigo.md) — definição do agente revisor usado na fase de revisão
 - [`SPEC.md`](./SPEC.md) — especificação e critérios de sucesso
 - [`CAPABILITY_MAP.md`](./CAPABILITY_MAP.md) — capacidades e ordem de construção
 - [`tasks/plan.md`](./tasks/plan.md) — marcos, riscos e checkpoints
