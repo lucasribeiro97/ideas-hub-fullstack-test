@@ -4,8 +4,8 @@ import { createUser, getUser, updateUser } from '../api/users.ts'
 import type { User } from '../api/types.ts'
 import { ErrorState } from '../components/ErrorState.tsx'
 import { PageHeading } from '../components/PageHeading.tsx'
+import { InlineError } from '../components/InlineError.tsx'
 import { UserForm } from '../components/UserForm.tsx'
-import { describeError } from '../lib/describeError.ts'
 import { toFieldErrors, type UserFormValues } from '../lib/userFormValidation.ts'
 
 interface UserFormPageProps {
@@ -96,11 +96,7 @@ export function UserFormPage({ mode }: UserFormPageProps) {
         }
       />
 
-      {generalError !== null && (
-        <p className="form__general-error" role="alert">
-          {describeError(generalError).description}
-        </p>
-      )}
+      {generalError !== null && <InlineError error={generalError} />}
 
       <UserForm
         initialValues={existing.data !== undefined ? toFormValues(existing.data) : undefined}

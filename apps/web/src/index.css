@@ -411,3 +411,67 @@ tbody tr:last-child td {
   display: flex;
   gap: 0.5rem;
 }
+
+.breadcrumb {
+  margin: 0 0 var(--spacing);
+}
+
+.details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem var(--spacing);
+  margin: 0;
+  padding: var(--spacing);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.details dt {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Em tela estreita os pares empilham, senão o identificador espreme o rótulo
+   até ficar ilegível. */
+@media (max-width: 30rem) {
+  .details {
+    grid-template-columns: 1fr;
+  }
+
+  .details dd {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.confirm {
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  margin-bottom: var(--spacing);
+  background: var(--color-surface);
+}
+
+.confirm__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.0625rem;
+}
+
+.confirm__description {
+  margin: 0 0 var(--spacing);
+  color: var(--color-text-muted);
+}
+
+.confirm__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.page-heading__actions {
+  display: flex;
+  gap: 0.5rem;
+}

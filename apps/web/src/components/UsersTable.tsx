@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import type { SortField, User } from '../api/types.ts'
 import type { UsersFilters } from '../lib/userFilters.ts'
 
@@ -30,6 +30,7 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ users, filters, onToggleSort }: UsersTableProps) {
+  const location = useLocation()
   return (
     <div className="table-wrapper">
       <table>
@@ -79,7 +80,11 @@ export function UsersTable({ users, filters, onToggleSort }: UsersTableProps) {
           {users.map((user) => (
             <tr key={user.id}>
               <td>
-                <Link to={`/users/${user.id}`}>{user.name}</Link>
+                {/* A query da listagem viaja junto para que a tela de detalhe
+                    saiba a que busca voltar depois de editar ou excluir. */}
+                <Link to={`/users/${user.id}`} state={{ from: location.search }}>
+                  {user.name}
+                </Link>
               </td>
               <td>{user.email}</td>
               <td>{user.phone ?? <span className="text-muted">—</span>}</td>
