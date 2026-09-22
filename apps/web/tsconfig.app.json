@@ -4,7 +4,11 @@
     "target": "es2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "esnext",
-    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
+    /* "node" existe por causa dos testes, que leem arquivos do disco para
+       verificar artefatos como o index.html. Código de `src/` continua sem
+       poder usar APIs do Node na prática: o Vite falha ao empacotar um import
+       de `node:fs` para o navegador. */
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom", "node"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
 
