@@ -4,12 +4,12 @@
  */
 
 :root {
-  --cor-texto: #1a1a1a;
-  --cor-fundo: #ffffff;
-  --cor-borda: #d4d4d4;
-  --cor-primaria: #1d4ed8;
-  --cor-erro: #b91c1c;
-  --espaco: 1rem;
+  --color-text: #1a1a1a;
+  --color-bg: #ffffff;
+  --color-border: #d4d4d4;
+  --color-primary: #1d4ed8;
+  --color-danger: #b91c1c;
+  --spacing: 1rem;
 
   color-scheme: light dark;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -22,39 +22,39 @@
 
 body {
   margin: 0;
-  color: var(--cor-texto);
-  background: var(--cor-fundo);
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 
 /* Foco sempre visível: requisito de navegação por teclado, não preferência
    estética. Nunca substituir por `outline: none`. */
 :focus-visible {
-  outline: 3px solid var(--cor-primaria);
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 .app__header {
-  border-bottom: 1px solid var(--cor-borda);
-  padding: var(--espaco);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing);
 }
 
 .app__header nav {
   display: flex;
-  gap: var(--espaco);
+  gap: var(--spacing);
 }
 
 .app__main {
   max-width: 70rem;
   margin: 0 auto;
-  padding: var(--espaco);
+  padding: var(--spacing);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --cor-texto: #ededed;
-    --cor-fundo: #161616;
-    --cor-borda: #3a3a3a;
-    --cor-primaria: #7aa2ff;
-    --cor-erro: #f87171;
+    --color-text: #ededed;
+    --color-bg: #161616;
+    --color-border: #3a3a3a;
+    --color-primary: #7aa2ff;
+    --color-danger: #f87171;
   }
 }

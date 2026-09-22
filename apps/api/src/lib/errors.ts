@@ -6,7 +6,7 @@
  * de resposta acontece num único ponto, em `error-handler.ts`.
  */
 
-export interface DetalheValidacao {
+export interface ValidationDetail {
   field: string
   message: string
 }
@@ -27,7 +27,7 @@ export class ValidationError extends AppError {
   readonly httpStatus = 422
 
   constructor(
-    readonly details: DetalheValidacao[],
+    readonly details: ValidationDetail[],
     message = 'Dados inválidos.',
   ) {
     super(message)
@@ -40,7 +40,7 @@ export class InvalidParamError extends AppError {
   readonly httpStatus = 400
 
   constructor(
-    readonly details: DetalheValidacao[],
+    readonly details: ValidationDetail[],
     message = 'Parâmetro inválido.',
   ) {
     super(message)
@@ -73,30 +73,34 @@ export class UserEmailTakenError extends AppError {
  * (TASK-API-01); assumir o contrário faria um email duplicado virar 500.
  */
 const SQLSTATE_UNIQUE_VIOLATION = '23505'
+const EMAIL_UNIQUE_CONSTRAINT = 'users_email_lower_unique'
 
-interface ErroPostgres {
+interface PostgresError {
   code?: string
   constraint?: string
 }
 
-function extrairErroPostgres(erro: unknown): ErroPostgres | undefined {
-  if (typeof erro !== 'object' || erro === null) return undefined
+function extractPostgresError(error: unknown): PostgresError | undefined {
+  if (typeof error !== 'object' || error === null) return undefined
 
-  const direto = erro as ErroPostgres
-  if (typeof direto.code === 'string') return direto
+  const direct = error as PostgresError
+  if (typeof direct.code === 'string') return direct
 
-  const causa = (erro as { cause?: unknown }).cause
-  if (typeof causa === 'object' && causa !== null) {
-    const aninhado = causa as ErroPostgres
-    if (typeof aninhado.code === 'string') return aninhado
+  const cause = (error as { cause?: unknown }).cause
+  if (typeof cause === 'object' && cause !== null) {
+    const nested = cause as PostgresError
+    if (typeof nested.code === 'string') return nested
   }
 
   return undefined
 }
 
 /** Violação do índice único de email, em qualquer caixa. */
-export function ehViolacaoDeEmailDuplicado(erro: unknown): boolean {
-  const pg = extrairErroPostgres(erro)
+export function isDuplicateEmailViolation(error: unknown): boolean {
+  const pgError = extractPostgresError(error)
 
-  return pg?.code === SQLSTATE_UNIQUE_VIOLATION && pg.constraint === 'users_email_lower_unique'
+  return (
+    pgError?.code === SQLSTATE_UNIQUE_VIOLATION &&
+    pgError.constraint === EMAIL_UNIQUE_CONSTRAINT
+  )
 }

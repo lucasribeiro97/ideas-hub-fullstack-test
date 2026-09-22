@@ -1,8 +1,8 @@
 import { fileURLToPath } from 'node:url'
 import { migrate } from 'drizzle-orm/node-postgres/migrator'
-import { criarBanco, type Database } from './client.js'
+import { createDatabase, type Database } from './client.js'
 
-export const PASTA_MIGRATIONS = fileURLToPath(new URL('./migrations', import.meta.url))
+export const MIGRATIONS_FOLDER = fileURLToPath(new URL('./migrations', import.meta.url))
 
 /**
  * Aplica as migrations pendentes.
@@ -11,8 +11,8 @@ export const PASTA_MIGRATIONS = fileURLToPath(new URL('./migrations', import.met
  * schema no Postgres efêmero do Testcontainers. Migrations de teste divergindo
  * das de produção seria a pior forma de falso positivo possível.
  */
-export async function aplicarMigrations(db: Database): Promise<void> {
-  await migrate(db, { migrationsFolder: PASTA_MIGRATIONS })
+export async function applyMigrations(db: Database): Promise<void> {
+  await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER })
 }
 
 /** Execução direta via `npm run db:migrate`. */
@@ -23,13 +23,13 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 
-  const { db, pool } = criarBanco(databaseUrl)
+  const { db, pool } = createDatabase(databaseUrl)
 
   try {
-    await aplicarMigrations(db)
+    await applyMigrations(db)
     process.stdout.write('Migrations aplicadas.\n')
-  } catch (erro) {
-    process.stderr.write(`\nFalha ao aplicar migrations: ${(erro as Error).message}\n\n`)
+  } catch (error) {
+    process.stderr.write(`\nFalha ao aplicar migrations: ${(error as Error).message}\n\n`)
     process.exitCode = 1
   } finally {
     await pool.end()

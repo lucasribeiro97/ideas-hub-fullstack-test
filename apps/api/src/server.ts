@@ -21,14 +21,14 @@ async function main(): Promise<void> {
 
   const app = await buildApp(env)
 
-  const encerrar = async (sinal: string): Promise<void> => {
-    app.log.info({ sinal }, 'encerrando')
+  const shutdown = async (signal: string): Promise<void> => {
+    app.log.info({ signal }, 'encerrando')
     await app.close()
     process.exit(0)
   }
 
-  process.on('SIGINT', () => void encerrar('SIGINT'))
-  process.on('SIGTERM', () => void encerrar('SIGTERM'))
+  process.on('SIGINT', () => void shutdown('SIGINT'))
+  process.on('SIGTERM', () => void shutdown('SIGTERM'))
 
   try {
     await app.listen({ port: env.PORT, host: env.HOST })

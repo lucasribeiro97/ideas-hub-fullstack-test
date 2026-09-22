@@ -21,15 +21,15 @@ describe('loggerOptions', () => {
   })
 
   it('respeita o nível de log configurado', () => {
-    const opcoes = loggerOptions(loadEnv({ ...base, NODE_ENV: 'production', LOG_LEVEL: 'debug' }))
+    const options = loggerOptions(loadEnv({ ...base, NODE_ENV: 'production', LOG_LEVEL: 'debug' }))
 
-    expect(opcoes).toMatchObject({ level: 'debug' })
+    expect(options).toMatchObject({ level: 'debug' })
   })
 
   // Critério S8: a chave da WeatherAPI não pode vazar nem por log acidental.
   it('mantém a chave da API na lista de campos ocultados', () => {
-    const opcoes = loggerOptions(loadEnv({ ...base, NODE_ENV: 'production' }))
-    const paths = (opcoes as { redact: { paths: string[] } }).redact.paths
+    const options = loggerOptions(loadEnv({ ...base, NODE_ENV: 'production' }))
+    const paths = (options as { redact: { paths: string[] } }).redact.paths
 
     expect(paths).toContain('WEATHER_API_KEY')
     expect(paths).toContain('*.WEATHER_API_KEY')

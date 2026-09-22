@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { EnvValidationError, loadEnv } from '../src/lib/env.js'
 
-const ambienteMinimo = {
+const minimalEnv = {
   DATABASE_URL: 'postgres://user:pass@localhost:5432/db',
   WEATHER_API_KEY: 'chave-de-teste',
 }
 
 describe('loadEnv', () => {
   it('aplica os padrões documentados quando só o obrigatório é fornecido', () => {
-    const env = loadEnv(ambienteMinimo)
+    const env = loadEnv(minimalEnv)
 
     expect(env.PORT).toBe(3000)
     expect(env.NODE_ENV).toBe('development')
@@ -17,27 +17,27 @@ describe('loadEnv', () => {
   })
 
   it('converte variáveis numéricas, que chegam sempre como texto', () => {
-    const env = loadEnv({ ...ambienteMinimo, PORT: '8080' })
+    const env = loadEnv({ ...minimalEnv, PORT: '8080' })
 
     expect(env.PORT).toBe(8080)
     expect(typeof env.PORT).toBe('number')
   })
 
   it('falha quando WEATHER_API_KEY está ausente, nomeando a variável', () => {
-    const { WEATHER_API_KEY: _omitida, ...semChave } = ambienteMinimo
+    const { WEATHER_API_KEY: _omitted, ...withoutKey } = minimalEnv
 
-    expect(() => loadEnv(semChave)).toThrow(EnvValidationError)
-    expect(() => loadEnv(semChave)).toThrow(/WEATHER_API_KEY/)
+    expect(() => loadEnv(withoutKey)).toThrow(EnvValidationError)
+    expect(() => loadEnv(withoutKey)).toThrow(/WEATHER_API_KEY/)
   })
 
   it('falha quando DATABASE_URL está ausente', () => {
-    const { DATABASE_URL: _omitida, ...semBanco } = ambienteMinimo
+    const { DATABASE_URL: _omitted, ...withoutDatabase } = minimalEnv
 
-    expect(() => loadEnv(semBanco)).toThrow(/DATABASE_URL/)
+    expect(() => loadEnv(withoutDatabase)).toThrow(/DATABASE_URL/)
   })
 
   it('rejeita valor numérico inválido em vez de cair no padrão', () => {
-    expect(() => loadEnv({ ...ambienteMinimo, PORT: 'não-é-número' })).toThrow(
+    expect(() => loadEnv({ ...minimalEnv, PORT: 'não-é-número' })).toThrow(
       EnvValidationError,
     )
   })
@@ -46,10 +46,10 @@ describe('loadEnv', () => {
     try {
       loadEnv({})
       expect.unreachable('loadEnv deveria ter lançado')
-    } catch (erro) {
-      const mensagem = (erro as Error).message
-      expect(mensagem).toMatch(/DATABASE_URL/)
-      expect(mensagem).toMatch(/WEATHER_API_KEY/)
+    } catch (error) {
+      const message = (error as Error).message
+      expect(message).toMatch(/DATABASE_URL/)
+      expect(message).toMatch(/WEATHER_API_KEY/)
     }
   })
 })

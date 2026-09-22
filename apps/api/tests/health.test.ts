@@ -21,40 +21,40 @@ afterAll(async () => {
 
 describe('GET /health', () => {
   it('responde 200 com o status do processo', async () => {
-    const resposta = await app.inject({ method: 'GET', url: '/health' })
-    const corpo = resposta.json<{ status: string; uptimeSeconds: number }>()
+    const response = await app.inject({ method: 'GET', url: '/health' })
+    const body = response.json<{ status: string; uptimeSeconds: number }>()
 
-    expect(resposta.statusCode).toBe(200)
-    expect(corpo.status).toBe('ok')
-    expect(corpo.uptimeSeconds).toBeGreaterThanOrEqual(0)
+    expect(response.statusCode).toBe(200)
+    expect(body.status).toBe('ok')
+    expect(body.uptimeSeconds).toBeGreaterThanOrEqual(0)
   })
 })
 
 describe('identificador de requisição', () => {
   it('devolve x-request-id na resposta', async () => {
-    const resposta = await app.inject({ method: 'GET', url: '/health' })
+    const response = await app.inject({ method: 'GET', url: '/health' })
 
-    expect(resposta.headers['x-request-id']).toBeTruthy()
+    expect(response.headers['x-request-id']).toBeTruthy()
   })
 
   it('gera identificadores distintos para requisições diferentes', async () => {
-    const [primeira, segunda] = await Promise.all([
+    const [first, second] = await Promise.all([
       app.inject({ method: 'GET', url: '/health' }),
       app.inject({ method: 'GET', url: '/health' }),
     ])
 
-    expect(primeira.headers['x-request-id']).not.toBe(segunda.headers['x-request-id'])
+    expect(first.headers['x-request-id']).not.toBe(second.headers['x-request-id'])
   })
 
-  it('reaproveita o identificador recebido para preservar a correlação', async () => {
-    const recebido = 'id-vindo-de-outro-servico'
+  it('reaproveita o identificador received para preservar a correlação', async () => {
+    const received = 'id-vindo-de-outro-servico'
 
-    const resposta = await app.inject({
+    const response = await app.inject({
       method: 'GET',
       url: '/health',
-      headers: { 'x-request-id': recebido },
+      headers: { 'x-request-id': received },
     })
 
-    expect(resposta.headers['x-request-id']).toBe(recebido)
+    expect(response.headers['x-request-id']).toBe(received)
   })
 })

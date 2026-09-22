@@ -1,7 +1,7 @@
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 import type { TestProject } from 'vitest/node'
-import { criarBanco } from '../../src/db/client.js'
-import { aplicarMigrations } from '../../src/db/migrate.js'
+import { createDatabase } from '../../src/db/client.js'
+import { applyMigrations } from '../../src/db/migrate.js'
 
 /**
  * Sobe UM PostgreSQL efêmero para toda a execução da suíte (risco R4).
@@ -21,10 +21,10 @@ export async function setup(project: TestProject): Promise<void> {
   const databaseUrl = container.getConnectionUri()
 
   // As migrations aplicadas aqui são exatamente as mesmas de produção — é o
-  // motivo de `aplicarMigrations` ser exportada como função em src/db.
-  const { db, pool } = criarBanco(databaseUrl)
+  // motivo de `applyMigrations` ser exportada como função em src/db.
+  const { db, pool } = createDatabase(databaseUrl)
   try {
-    await aplicarMigrations(db)
+    await applyMigrations(db)
   } finally {
     await pool.end()
   }

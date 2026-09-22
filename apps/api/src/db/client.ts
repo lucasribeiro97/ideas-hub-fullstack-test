@@ -11,7 +11,7 @@ export type Database = NodePgDatabase<typeof schema>
  * servidor no encerramento, e cada suíte de teste ao final. Esconder o pool
  * levaria a conexões penduradas nos testes.
  */
-export function criarBanco(databaseUrl: string): { db: Database; pool: Pool } {
+export function createDatabase(databaseUrl: string): { db: Database; pool: Pool } {
   const pool = new Pool({ connectionString: databaseUrl })
   const db = drizzle(pool, { schema })
 

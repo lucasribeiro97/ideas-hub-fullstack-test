@@ -4,7 +4,7 @@ import cors from '@fastify/cors'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import type { Env } from './lib/env.js'
 import { loggerOptions } from './lib/logger.js'
-import { registrarTratamentoDeErros } from './lib/error-handler.js'
+import { registerErrorHandling } from './lib/error-handler.js'
 import { healthRoutes } from './modules/health/health.routes.js'
 
 /**
@@ -36,7 +36,7 @@ export async function buildApp(env: Env): Promise<FastifyInstance> {
     reply.header('x-request-id', request.id)
   })
 
-  registrarTratamentoDeErros(app)
+  registerErrorHandling(app)
 
   await app.register(healthRoutes)
 

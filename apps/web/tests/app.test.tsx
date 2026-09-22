@@ -3,12 +3,12 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { App } from '../src/App'
-import { criarQueryClient } from '../src/lib/queryClient'
+import { createQueryClient } from '../src/lib/queryClient'
 
-function renderizar(rota: string) {
+function renderAt(route: string) {
   return render(
-    <QueryClientProvider client={criarQueryClient()}>
-      <MemoryRouter initialEntries={[rota]}>
+    <QueryClientProvider client={createQueryClient()}>
+      <MemoryRouter initialEntries={[route]}>
         <App />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -17,19 +17,19 @@ function renderizar(rota: string) {
 
 describe('App', () => {
   it('renderiza a navegação principal em todas as rotas', () => {
-    renderizar('/')
+    renderAt('/')
 
     const nav = screen.getByRole('navigation', { name: /navegação principal/i })
     expect(nav).toBeInTheDocument()
   })
 
   it('resolve cada rota conhecida para a sua tela', () => {
-    renderizar('/usuarios')
+    renderAt('/users')
     expect(screen.getByRole('heading', { name: 'Usuários' })).toBeInTheDocument()
   })
 
   it('exibe página não encontrada para rota desconhecida', () => {
-    renderizar('/rota-que-nao-existe')
+    renderAt('/no-such-route')
     expect(screen.getByRole('heading', { name: /não encontrada/i })).toBeInTheDocument()
   })
 })

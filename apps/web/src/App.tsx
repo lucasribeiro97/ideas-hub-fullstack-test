@@ -11,16 +11,16 @@ export function App() {
     <div className="app">
       <header className="app__header">
         <nav aria-label="Navegação principal">
-          <Link to="/usuarios">Usuários</Link>
-          <Link to="/clima">Clima</Link>
+          <Link to="/users">Usuários</Link>
+          <Link to="/weather">Clima</Link>
         </nav>
       </header>
 
       <main className="app__main">
         <Routes>
           <Route path="/" element={<h1>Ideas Hub</h1>} />
-          <Route path="/usuarios" element={<h1>Usuários</h1>} />
-          <Route path="/clima" element={<h1>Clima</h1>} />
+          <Route path="/users" element={<h1>Usuários</h1>} />
+          <Route path="/weather" element={<h1>Clima</h1>} />
           <Route path="*" element={<h1>Página não encontrada</h1>} />
         </Routes>
       </main>

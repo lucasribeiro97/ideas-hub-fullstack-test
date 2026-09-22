@@ -47,12 +47,12 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   const result = envSchema.safeParse(source)
 
   if (!result.success) {
-    const detalhes = result.error.issues
+    const problems = result.error.issues
       .map((issue) => `  - ${issue.path.join('.') || '(raiz)'}: ${issue.message}`)
       .join('\n')
 
     throw new EnvValidationError(
-      `Variáveis de ambiente inválidas:\n${detalhes}\n\n` +
+      `Variáveis de ambiente inválidas:\n${problems}\n\n` +
         'Consulte o .env.example na raiz do repositório.',
     )
   }
