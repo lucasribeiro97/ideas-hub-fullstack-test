@@ -305,11 +305,11 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S14 · **Commit:** `6d23891`
 
 ### TASK-WEB-09 — Teste de fluxo do frontend
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** teste com Testing Library e MSW cobrindo buscar, paginar e abrir um
   usuário, afirmando comportamento observável — não apenas que renderizou.
 - **Verificação:** `npm test` em `apps/web` verde.
-- **Critérios:** S5, S13 · **Commit:** —
+- **Critérios:** S5, S13 · **Commit:** `fb718e4`
 
 ---
 
@@ -399,7 +399,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S2 Importação reproduzível | TASK-IMPORT-02, TASK-IMPORT-03, TASK-IMPORT-05 | `cba066d`, `f23e16b`, `a0bc095` | dupla execução: 0 inseridos, conjunto idêntico |
 | S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | `43fa84a`, `a0bc095` | conferência automática a cada execução |
 | S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7`, `bcf8bf8` | 409 no POST e no PATCH, inclusive em caixa diferente |
-| S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f`, `761017d` | 22 testes na API; uso espontâneo do GIN só com volume, no M4 |
+| S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f`, `761017d`, `fb718e4` | API e percursos de ponta a ponta |
 | S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial), `b05d640` | provado nos cinco endpoints de usuários |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | `1cd6440`, `82e54ad` | 6 modos de falha provados em HTTP |
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial), `82e54ad` | ausente de respostas, cabeçalhos e log real |
@@ -407,7 +407,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710`, `dd855d5` | ida e volta pela URL e retorno da exclusão |
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
-| S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem coberta; faltam formulário e clima |
+| S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem, formulário e detalhe cobertos |
 | S14 Utilizável por teclado | TASK-WEB-08 | `6d23891` | axe sem violações em 7 telas + fluxos por teclado |
 | S15 Executável pelo README | TASK-DOC-02 | — | setup em diretório limpo |
 | S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27`, `a0bc095` | gate ativo em modules/** e scripts/** |
