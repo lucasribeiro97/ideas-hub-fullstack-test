@@ -21,6 +21,7 @@
     "fastify": "^5.12.5",
     "fastify-type-provider-zod": "^7.0.0",
     "pg": "^8.23.0",
+    "pg-copy-streams": "^7.0.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -28,6 +29,7 @@
     "@testcontainers/postgresql": "^12.1.0",
     "@types/node": "^26.6.2",
     "@types/pg": "^8.23.1",
+    "@types/pg-copy-streams": "^1.2.5",
     "@vitest/coverage-v8": "^5.0.1",
     "drizzle-kit": "^0.31.11",
     "eslint": "^10.11.0",

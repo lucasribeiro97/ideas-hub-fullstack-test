@@ -48,8 +48,11 @@ Levantado por inspeção direta do arquivo antes de qualquer decisão de modelag
 Consequências diretas para o projeto:
 
 - **Streaming é obrigatório.** 935 MB não cabem confortavelmente em memória.
-- **`COPY` em vez de `INSERT` linha a linha.** A ~1.000 inserções/s, 10M de linhas
-  levariam horas; `COPY` reduz a carga a minutos.
+- **`COPY` em vez de `INSERT` linha a linha.** Medido nesta máquina com 10 mil linhas
+  reais: `INSERT` sequencial faz 4.752 linhas/s e `COPY` faz 84.752 linhas/s — **17,8×
+  mais rápido**, o que projeta ~35 minutos contra ~2 minutos para o arquivo completo.
+  A estimativa inicial desta seção dizia "~1.000 inserções/s, levariam horas"; era um
+  chute, e está substituída pela medição.
 - **A deduplicação é a maior parte do trabalho**, não um caso de borda: 84% das linhas
   são descartadas.
 - **O arquivo está estruturalmente íntegro.** A validação de registros inválidos existe
