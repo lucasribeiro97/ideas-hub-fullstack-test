@@ -73,6 +73,22 @@ function splitFields(line: string): string[] | undefined {
   return line.split(',')
 }
 
+/*
+ * Caracteres de controle C0, menos tabulação, quebra de linha e retorno — esses
+ * três o `escapeCopyValue` já neutraliza, e o enquadramento em linhas já tratou
+ * os dois últimos antes de chegar aqui.
+ *
+ * O byte NUL é o que motivou a regra: ele não é espaço em branco, então
+ * sobrevivia ao `trim()` e ao padrão de email, e só era recusado lá na frente
+ * pelo Postgres — que aborta o `COPY` inteiro em vez de descartar a linha. Uma
+ * linha ruim derrubava a importação inteira, contrariando a promessa escrita
+ * logo acima.
+ */
+// A regra `no-control-regex` existe para pegar caractere de controle colocado
+// na expressão por acidente. Aqui ele é justamente o que se procura.
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHARACTERS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/
+
 function validate(fields: string[], lineNumber: number): ParsedUser | RejectedLine {
   const [id = '', name = '', email = '', phone = ''] = fields
   const reject = (reason: string): RejectedLine => ({
@@ -80,6 +96,12 @@ function validate(fields: string[], lineNumber: number): ParsedUser | RejectedLi
     reason,
     excerpt: fields.join(',').slice(0, MAX_EXCERPT),
   })
+
+  // Antes de qualquer outra verificação: o campo com caractere de controle não
+  // chega a ser um id, um nome ou um email — é dado corrompido.
+  if (fields.some((field) => CONTROL_CHARACTERS.test(field))) {
+    return reject('campo com caractere de controle')
+  }
 
   if (!UUID_PATTERN.test(id)) return reject('id não é um UUID válido')
 

@@ -1,5 +1,6 @@
 import type { Pool } from 'pg'
 import { mergeStagingIntoUsers } from './dedupe.js'
+import { acquireImportLock } from './lock.js'
 import { createImportStats, streamValidUsers, type RejectedLine } from './parse.js'
 import { copyUsersToStaging, createStagingTable, dropStagingTable } from './staging.js'
 
@@ -39,6 +40,11 @@ export async function runImport(pool: Pool, options: RunImportOptions): Promise<
   const startedAt = process.hrtime.bigint()
   const stats = createImportStats()
 
+  // Antes de tocar na tabela de rascunho: ela tem nome fixo e global, e duas
+  // execuções concorrentes se corrompem mutuamente sem que a conferência das
+  // contagens perceba.
+  const lock = await acquireImportLock(pool)
+
   try {
     await createStagingTable(pool)
 
@@ -67,6 +73,7 @@ export async function runImport(pool: Pool, options: RunImportOptions): Promise<
     }
   } finally {
     await dropStagingTable(pool)
+    await lock.release()
   }
 }
 

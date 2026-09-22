@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { domainCeiling, domainFloor } from '../lib/chartDomain.ts'
 import type { HourlyTemperature } from '../api/types.ts'
 
 const numberFormatter = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 })
@@ -132,10 +133,7 @@ export function TemperatureChart({ hourly, city }: TemperatureChartProps) {
               // comprimento codifica magnitude a partir do zero; numa linha de
               // temperatura, que não tem zero significativo, o intervalo dos
               // dados é a referência correta.
-              domain={[
-                (dataMin: number) => Math.floor(dataMin - 2),
-                (dataMax: number) => Math.ceil(dataMax + 2),
-              ]}
+              domain={[domainFloor, domainCeiling]}
             />
             <Tooltip
               content={<ChartTooltip />}

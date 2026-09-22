@@ -1,13 +1,47 @@
-import { describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { App } from '../src/App'
 import { createQueryClient } from '../src/lib/queryClient'
+import { apiServer } from './helpers/api-server'
+import { currentUsers, installFakeApi, seedUsers } from './helpers/fake-api'
+
+/*
+ * Este arquivo era o único dos treze sem `apiServer.listen`.
+ *
+ * A consequência não era um teste frágil: era um teste que falava com a API e
+ * com o banco reais da máquina de quem rodasse. A garantia de
+ * `onUnhandledRequest: 'error'` que a SPEC §8 apresenta como válida para a
+ * suíte inteira não valia aqui. A revisão provou instalando um servidor que
+ * registrava as chamadas e capturando `1–20 de 220.873 · página 1 de 11.044`
+ * vindo do banco de desenvolvimento.
+ *
+ * Numa máquina sem a API no ar os casos continuavam verdes, porque afirmavam
+ * sobre o quadro de carregamento — verdes em qualquer cenário, e portanto sem
+ * valor de regressão.
+ */
+
+beforeAll(() => {
+  apiServer.listen({ onUnhandledRequest: 'error' })
+})
+
+beforeEach(() => {
+  seedUsers([{ name: 'Ana Souza', email: 'ana@exemplo.com', phone: null }])
+  installFakeApi()
+})
+
+afterEach(() => {
+  apiServer.resetHandlers()
+})
+
+afterAll(() => {
+  apiServer.close()
+})
 
 function renderAt(route: string) {
   return render(
-    <QueryClientProvider client={createQueryClient()}>
+    <QueryClientProvider client={createQueryClient({ queries: { retry: false } })}>
       <MemoryRouter initialEntries={[route]}>
         <App />
       </MemoryRouter>
@@ -23,13 +57,34 @@ describe('rotas abrem por URL direta', () => {
   it.each([
     ['/users', 'Usuários'],
     ['/users/new', 'Novo usuário'],
-    ['/users/63f1ea59-25ad-41ab-8437-b8c00bed9031', 'Detalhes do usuário'],
-    ['/users/63f1ea59-25ad-41ab-8437-b8c00bed9031/edit', 'Editar usuário'],
     ['/weather', 'Clima'],
   ])('%s abre a tela "%s"', (route, heading) => {
     renderAt(route)
 
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
+  })
+
+  /*
+   * As duas rotas com identificador esperam pelo título que só existe no
+   * sucesso.
+   *
+   * Antes elas esperavam por "Detalhes do usuário" e "Editar usuário" de forma
+   * síncrona — e esses são os títulos das telas de **carregando** e de **erro**.
+   * Os casos afirmavam ter chegado ao destino olhando para a tela de espera: a
+   * revisão destruiu as duas telas por completo e os dois testes continuaram
+   * passando.
+   */
+  it('/users/:id abre o detalhe do usuário', async () => {
+    renderAt(`/users/${currentUsers()[0]!.id}`)
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Ana Souza' })).toBeInTheDocument()
+  })
+
+  it('/users/:id/edit abre a edição com o registro carregado', async () => {
+    renderAt(`/users/${currentUsers()[0]!.id}/edit`)
+
+    expect(await screen.findByDisplayValue('Ana Souza')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Editar usuário' })).toBeInTheDocument()
   })
 
   it('a raiz redireciona para a listagem', () => {

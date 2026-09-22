@@ -28,8 +28,24 @@ Se você não conseguiu nenhuma das duas, ou o achado não entra no relatório, 
 marcado como **NÃO VERIFICADO** com a frase exata do que faltou para verificar. Nunca
 apresente inferência como fato.
 
+## Regras do ambiente
+
 Use o diretório temporário da sessão para qualquer arquivo que você criar. Não escreva
-dentro de `apps/`.
+dentro de `apps/`, de `data/`, nem na raiz do repositório — nem temporariamente, nem
+"restaurando depois".
+
+**Escrita no banco só em banco descartável.** Crie o seu com
+`CREATE DATABASE rev_<sua-área>`, aponte a `DATABASE_URL` para ele, e remova-o ao
+terminar. Nunca escreva no banco de desenvolvimento.
+
+Essa regra existe porque a versão anterior dizia apenas "não apague registros que você
+não criou", e um revisor apagou um registro real ao testar o `DELETE` de um id que ele
+**presumiu** inexistente — o UUID vinha de um fixture de teste, e existia no banco. A
+presunção é o defeito: você não sabe o que existe até verificar, e verificar antes de
+cada escrita é mais frágil que não escrever no banco alheio.
+
+Se precisar exercitar a API em execução, use apenas leitura. Para exercitar escrita, suba
+uma segunda instância apontando para o seu banco descartável, numa porta livre.
 
 ## O que este projeto é
 

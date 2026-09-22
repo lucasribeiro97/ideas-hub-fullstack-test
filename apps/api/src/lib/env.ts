@@ -31,6 +31,16 @@ const envSchema = z.object({
   WEATHER_API_BASE_URL: z.string().min(1).default('https://api.weatherapi.com/v1'),
   WEATHER_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(600),
   WEATHER_TIMEOUT_MS: z.coerce.number().int().positive().default(5000),
+
+  /*
+   * Tempo máximo de uma consulta da API, em milissegundos.
+   *
+   * Existe para que nenhuma requisição possa monopolizar uma das dez conexões
+   * do pool indefinidamente. O padrão é folgado em relação ao que se mediu: a
+   * listagem mais cara com 220.874 registros levou 330 ms, e a consulta comum
+   * fica abaixo de 1 ms. O script de importação não usa este valor.
+   */
+  DB_STATEMENT_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
 })
 
 export type Env = z.infer<typeof envSchema>

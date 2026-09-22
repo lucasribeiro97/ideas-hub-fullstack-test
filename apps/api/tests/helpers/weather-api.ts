@@ -10,7 +10,7 @@ import { setupServer } from 'msw/node'
  */
 export const WEATHER_BASE_URL = 'https://api.weatherapi.com/v1'
 
-const FORECAST_URL = `${WEATHER_BASE_URL}/forecast.json`
+export const FORECAST_URL = `${WEATHER_BASE_URL}/forecast.json`
 
 /** Resposta de sucesso no formato real da WeatherAPI. */
 export function forecastPayload(overrides: { city?: string; tempC?: number } = {}) {
@@ -62,11 +62,38 @@ export function mockCityNotFound(): void {
   )
 }
 
+/**
+ * Cota esgotada, como a WeatherAPI de verdade responde.
+ *
+ * **HTTP 403**, não 429. A tabela oficial de erros
+ * (https://www.weatherapi.com/docs/) mapeia o código 2007 — "API key has
+ * exceeded calls per month quota" — para 403, e não tem nenhuma linha com 429.
+ *
+ * Este helper dizia 429, e o teste que o usava passava verificando uma resposta
+ * que o fornecedor nunca envia: o simulador definia a realidade que ele mesmo
+ * conferia. O defeito real só apareceu quando alguém foi ler a documentação da
+ * origem.
+ */
 export function mockRateLimited(): void {
   weatherApi.use(
     http.get(FORECAST_URL, () =>
-      HttpResponse.json({ error: { code: 2007, message: 'Quota exceeded' } }, { status: 429 }),
+      HttpResponse.json(
+        { error: { code: 2007, message: 'API key has exceeded calls per month quota.' } },
+        { status: 403 },
+      ),
     ),
+  )
+}
+
+/**
+ * Cota esgotada sinalizada por 429.
+ *
+ * A WeatherAPI não usa esse status hoje, mas ele é o convencional para o caso e
+ * nada impede que passe a ser usado. O tratamento cobre os dois.
+ */
+export function mockRateLimitedByStatus(): void {
+  weatherApi.use(
+    http.get(FORECAST_URL, () => new HttpResponse(null, { status: 429 })),
   )
 }
 

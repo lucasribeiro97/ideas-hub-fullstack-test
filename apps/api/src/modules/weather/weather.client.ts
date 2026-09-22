@@ -17,7 +17,14 @@ export interface WeatherClientOptions {
 }
 
 /** Código da WeatherAPI para localidade não encontrada. */
+/*
+ * Códigos do corpo de erro da WeatherAPI, conforme a tabela oficial em
+ * https://www.weatherapi.com/docs/ — a mesma fonte que registra que esses
+ * erros vêm com status 400 e 403, e que 429 não é usado.
+ */
 const UPSTREAM_CODE_NO_LOCATION = 1006
+/** "API key has exceeded calls per month quota", entregue com HTTP 403. */
+const UPSTREAM_CODE_QUOTA_EXCEEDED = 2007
 
 interface UpstreamErrorBody {
   error?: { code?: number; message?: string }
@@ -28,16 +35,34 @@ interface UpstreamErrorBody {
  *
  * A regra é que nenhum status da WeatherAPI atravesse direto: o 400 que eles
  * usam para "cidade não existe" viraria um 400 genérico aqui, indistinguível
- * de erro de quem chamou. E 401/403 significam chave errada — problema nosso
- * de configuração, não do cliente, então vira 502 e vai para o log.
+ * de erro de quem chamou. Chave errada ou desabilitada é problema nosso de
+ * configuração, não do cliente, então vira 502 e vai para o log.
+ *
+ * A classificação é feita pelo `code` do corpo, e não pelo status HTTP, porque
+ * a WeatherAPI **não usa 429**: a tabela oficial de erros mapeia cota esgotada
+ * para HTTP 403 com `code: 2007`, o mesmo status de "chave desabilitada". Ler
+ * só o status confundia o modo de falha mais provável deste projeto — a chave
+ * gratuita atingindo o limite — com indisponibilidade da origem, devolvendo
+ * "o serviço está indisponível" em vez de "limite de consultas atingido", e
+ * mandando quem opera procurar um incidente que não existe.
+ *
+ * O 429 continua tratado porque é o status convencional para isso e nada
+ * impede a origem de passar a usá-lo.
  */
+async function readUpstreamCode(response: Response): Promise<number | undefined> {
+  const body = (await response.json().catch(() => ({}))) as UpstreamErrorBody
+
+  return body.error?.code
+}
+
 async function translateUpstreamFailure(response: Response): Promise<never> {
   if (response.status === 429) throw new WeatherRateLimitedError()
 
-  if (response.status === 400) {
-    const body = (await response.json().catch(() => ({}))) as UpstreamErrorBody
+  if (response.status === 400 || response.status === 403) {
+    const code = await readUpstreamCode(response)
 
-    if (body.error?.code === UPSTREAM_CODE_NO_LOCATION) throw new WeatherCityNotFoundError()
+    if (code === UPSTREAM_CODE_NO_LOCATION) throw new WeatherCityNotFoundError()
+    if (code === UPSTREAM_CODE_QUOTA_EXCEEDED) throw new WeatherRateLimitedError()
   }
 
   throw new WeatherUpstreamError()

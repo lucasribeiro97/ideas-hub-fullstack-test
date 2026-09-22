@@ -6,7 +6,7 @@ serviço externo de informações climáticas.
 **Node.js 22 + TypeScript + Fastify + PostgreSQL 16** no backend,
 **React 19 + TypeScript + Vite** no frontend.
 
-- 315 testes na API, 226 no frontend
+- 361 testes na API, 245 no frontend
 - 220.875 usuários importados do CSV de origem, a partir de 500 mil linhas
 - Contrato documentado em OpenAPI, servido pelo Swagger UI
 
@@ -26,7 +26,7 @@ serviço externo de informações climáticas.
 - [Documentação do processo](#documentação-do-processo)
 
 > A sequência abaixo foi executada do zero num diretório limpo, a partir de um clone
-> novo, antes desta entrega. Os 553 testes passam numa instalação virgem.
+> novo, antes desta entrega. Os 606 testes passam numa instalação virgem.
 
 ## Pré-requisitos
 
@@ -148,13 +148,14 @@ valores reais.
 | `POSTGRES_PORT` | `5432` | Porta publicada pelo container |
 | `DATABASE_URL` | — | Conexão da API; precisa refletir as credenciais acima |
 | `PORT` | `3000` | Porta HTTP da API |
-| `HOST` | `0.0.0.0` | Interface de escuta |
+| `HOST` | `0.0.0.0` | Interface de escuta. Veja as limitações conhecidas antes de publicar |
 | `LOG_LEVEL` | `info` | Nível do log estruturado |
 | `CORS_ORIGIN` | `http://localhost:5173` | Origem autorizada a chamar a API |
 | **`WEATHER_API_KEY`** | — | **Obrigatória.** Chave da WeatherAPI |
 | `WEATHER_API_BASE_URL` | `https://api.weatherapi.com/v1` | Endereço da origem |
 | `WEATHER_CACHE_TTL_SECONDS` | `600` | Expiração do cache de clima |
 | `WEATHER_TIMEOUT_MS` | `5000` | Tempo limite da chamada externa |
+| `DB_STATEMENT_TIMEOUT_MS` | `10000` | Tempo máximo de uma consulta da API. Não se aplica à importação |
 | `VITE_API_URL` | `http://localhost:3000` | URL da API usada pela interface |
 
 A API **valida todas na inicialização** e encerra com mensagem clara se algo faltar,
@@ -202,7 +203,7 @@ Dentro de `apps/web`:
 ## Testes
 
 ```bash
-cd apps/api && npm test    # 315 testes
+cd apps/api && npm test    # 361 testes
 cd apps/web && npm test    # 226 testes
 ```
 
@@ -387,6 +388,49 @@ O `COUNT` com filtro usa `BitmapOr` sobre os dois índices GIN. O risco de ele s
 proibitivo **não se materializou** nesse volume.
 
 ## Limitações conhecidas
+
+As entradas abaixo marcadas com **[revisão]** vieram de uma varredura adversarial do
+código feita por agentes de IA especializados, cada achado com reprodução executada. As
+de severidade alta foram corrigidas; estas são as que ficaram, com o custo medido e a
+razão de terem ficado.
+
+**`sort=name` e `sort=email` não têm índice.** [revisão] A tabela de índices da SPEC §7
+documenta apenas o de `created_at`, e a interface oferece as três colunas como
+ordenáveis. Medido com 220.874 registros: 0,43 ms com índice contra 57,9 ms sem, e 135×
+mais buffers lidos por clique na coluna "Nome". Criar `(name, id)` e `(email, id)`
+resolveria, ao custo de escrita e espaço na importação de 10 milhões de linhas — a
+decisão precisa de medição da carga completa, que não foi feita. O teto de `page` e o
+tempo limite de consulta, ambos aplicados, limitam o pior caso enquanto isso.
+
+**A API escuta em `0.0.0.0` por padrão.** [revisão] Combinado com a ausência de
+autenticação, que a SPEC §12 coloca fora de escopo, qualquer máquina na mesma rede tem
+acesso completo ao CRUD. Confirmado respondendo pelo IP de LAN. O padrão continua aberto
+porque é o que faz o `docker compose` funcionar sem configuração extra; quem publicar
+precisa definir `HOST=127.0.0.1` e colocar um proxy na frente.
+
+**O log grava os parâmetros da consulta quando o banco falha.** [revisão] O
+`DrizzleQueryError` carrega `query` e `params`, e o serializador do pino os emite. A
+lista de `redact` cobre a chave da WeatherAPI e os cabeçalhos de autenticação, mas não
+`params` — então uma indisponibilidade do banco transforma o log num repositório
+secundário de nome, email e telefone em claro. A resposta ao cliente continua correta e
+genérica.
+
+**`/weather` não coalesce chamadas em voo.** [revisão] N requisições simultâneas para a
+mesma cidade fria produzem N chamadas à origem: medido, 50 de 50 com `hit:false`. O
+cache protege repetição sequencial, não pico de concorrência, e um `404` da origem nunca
+é memorizado. Sem limite de taxa, um cliente esgota a cota gratuita variando o nome da
+cidade.
+
+**Origem climática lenta no corpo vira `502`, não `504`.** [revisão] O tempo limite
+protege a requisição inteira e o servidor não trava, mas quando o aborto ocorre durante
+a leitura do corpo o erro é classificado como indisponibilidade em vez de tempo
+esgotado. O tempo gasto é o mesmo; só o diagnóstico muda.
+
+**Interromper a importação não cancela a gravação.** [revisão] Com o processo morto por
+`kill -9` durante o merge, o backend do PostgreSQL continua e **commita**; a staging fica
+para trás. Quem abortou não recebe saída nem código de retorno e acredita que nada foi
+gravado. A execução seguinte se recupera do órfão — o `TRUNCATE` faz seu trabalho,
+verificado.
 
 **A escala completa não foi carregada.** O padrão importa 500 mil linhas para que a
 avaliação seja rápida. As medições acima projetam ~2 minutos para os 10 milhões, mas a

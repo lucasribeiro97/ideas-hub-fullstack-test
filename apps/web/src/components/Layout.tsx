@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { ErrorBoundary } from './ErrorBoundary.tsx'
 
 const LINKS = [
   { to: '/users', label: 'Usuários' },
@@ -17,6 +18,8 @@ const LINKS = [
  * cores também.
  */
 export function Layout() {
+  const location = useLocation()
+
   return (
     <div className="app">
       <a className="skip-link" href="#conteudo">
@@ -41,7 +44,14 @@ export function Layout() {
       </header>
 
       <main className="app__main" id="conteudo" tabIndex={-1}>
-        <Outlet />
+        {/*
+          A chave é o caminho para que trocar de tela limpe um erro anterior:
+          sem ela, o limite continuaria mostrando a mensagem de falha na tela
+          seguinte, que não tem nada a ver com o problema.
+        */}
+        <ErrorBoundary key={location.pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   )
