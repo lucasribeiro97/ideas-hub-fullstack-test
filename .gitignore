@@ -20,10 +20,14 @@ coverage/
 npm-debug.log*
 logs/
 
-# Dados de importação (CSV baixado, volumes do Postgres)
+# Dados de importação: o dataset de origem vive em data/ e não é versionado.
+#
+# A regra é restrita ao diretório de propósito. Um `*.csv` global excluía
+# também as fixtures dos testes — arquivos pequenos que PRECISAM ser
+# versionados —, e o efeito era invisível localmente: a suíte passava aqui e
+# quebrava em qualquer clone novo. Encontrado ao instalar o projeto do zero
+# num diretório separado.
 data/
-*.csv
-*.csv.gz
 
 # Editor / SO
 .DS_Store

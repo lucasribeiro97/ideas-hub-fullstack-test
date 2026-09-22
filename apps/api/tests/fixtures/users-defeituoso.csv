@@ -1,0 +1,12 @@
+id,name,email,phone
+63f1ea59-25ad-41ab-8437-b8c00bed9031,Valido Um,valido1@exemplo.com,(11) 90000-0001
+nao-e-uuid,Id Invalido,invalido@exemplo.com,(11) 90000-0002
+1c6a36ed-61a0-4406-a2ff-00a81598af02,,sem-nome@exemplo.com,(11) 90000-0003
+e9b69b01-adc3-4e1b-8872-b494c192feb5,Sem Email,,(11) 90000-0004
+c24bfa10-bcce-46f3-a61b-aa07e9e8e508,Email Torto,nao-e-email,(11) 90000-0005
+7af4ed44-3d38-4711-95d7-2db038479e07,Campos De Menos,faltando@exemplo.com
+00936e1f-0083-4445-8b22-c2f5071fda33,Campos De Mais,demais@exemplo.com,(11) 9,extra
+0cbe36e2-a317-42ea-81cf-c1e375739745,Valido Dois,valido2@exemplo.com,
+2d1b8e88-9f24-4a1e-8b7c-3e5a6f0c1d29,"Com Aspas",aspas@exemplo.com,(11) 90000-0006
+
+f3a5c7e1-4b2d-4c8f-9a6e-1d0b2c3e4f50,Valido Tres,valido3@exemplo.com,(11) 90000-0007
