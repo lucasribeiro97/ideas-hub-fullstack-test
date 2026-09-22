@@ -146,7 +146,10 @@ describe('a busca não dispara a cada tecla', () => {
 describe('requisições obsoletas são canceladas', () => {
   it('a consulta anterior é abortada quando os filtros mudam antes da resposta', async () => {
     const user = userEvent.setup()
-    trackRequests(400)
+    // Atraso bem maior que digitação + debounce (~400ms no total). Com uma
+    // margem apertada a corrida fica no limite e o teste falha de forma
+    // intermitente — detectado ao rodar a suíte repetidamente.
+    trackRequests(3_000)
     renderAt()
 
     await waitFor(() => {
@@ -166,13 +169,13 @@ describe('requisições obsoletas são canceladas', () => {
       () => {
         expect(tracker.aborted).toContain('ana')
       },
-      { timeout: 3_000 },
+      { timeout: 6_000 },
     )
   }, 15_000)
 
   it('o resultado exibido é o da última busca, não o da primeira a responder', async () => {
     const user = userEvent.setup()
-    trackRequests(200)
+    trackRequests(600)
     renderAt()
 
     const field = await screen.findByRole('searchbox', { name: /buscar/i })
