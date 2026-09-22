@@ -438,6 +438,12 @@ A regra prática: **o que o compilador lê é inglês; o que uma pessoa lê é p
 - Sem internacionalização; a interface é em português.
 - Sem soft delete: `DELETE` remove o registro.
 - A importação não é incremental nem retomável; reprocessa o arquivo do início.
+- **Sem biblioteca de componentes de interface.** O enunciado declara que design
+  sofisticado não é valorizado e pede para evitar abstração sem uso concreto; treze
+  componentes próprios, com CSS legível e tokens validados, atendem. A fronteira deste
+  não-objetivo é **acessibilidade de interação**, que não é questão de estilo: onde o
+  comportamento de foco e teclado é escrito à mão, o defeito reaparece a cada componente
+  novo. Registrado como `TASK-OPT-04`, com a decisão sobre Tailwind em aberto.
 
 ## 13. Critérios de sucesso
 

@@ -387,6 +387,43 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** — · **Commit:** —
 - **Nota:** primeiro item da ordem de corte do plano §5.
 
+### TASK-OPT-04 — Redesenho da interface, possivelmente com shadcn/ui
+- **Estado:** ⬜
+- **Motivação:** não é estética. O enunciado diz que design sofisticado não é valorizado
+  e pede clareza e consistência, o que a interface atual entrega — axe sem violações em
+  dez estados de tela, 14 tokens de cor, paleta validada contra as nossas superfícies. O que
+  motiva é a **acessibilidade de interação feita à mão**: a revisão encontrou a
+  confirmação de exclusão tomando o foco e não devolvendo, e esse é o tipo de defeito que
+  reaparece a cada componente novo. Primitivas prontas resolvem por construção o que a
+  implementação à mão resolve caso a caso.
+- **Aceite:**
+  1. O fluxo de exclusão devolve o foco ao elemento de origem ao cancelar, e o move para
+     o conteúdo principal após excluir.
+  2. Diálogo, seleção e campos de formulário usam primitivas com semântica e teclado
+     garantidos, em vez de `div` com `role` escrito à mão.
+  3. Zero violações do axe nos dez estados de tela — o patamar atual não pode regredir.
+  4. A paleta do gráfico continua sendo a validada; o redesenho não pode reintroduzir
+     cor não verificada.
+  5. Nenhum componente entra sem uso concreto: o enunciado pede para evitar abstração sem
+     uso, e uma biblioteca de componentes é o convite mais fácil para isso.
+- **Decisão em aberto — adotar Tailwind ou não.** shadcn/ui **não é dependência**: é um
+  gerador que copia o código-fonte do componente para o repositório, sobre Radix UI e
+  Tailwind CSS. Adotá-lo significa trazer Tailwind para um projeto que hoje tem 624
+  linhas de CSS próprio e legível, com tokens que a skill de visualização validou. O
+  ganho está em Radix, não em Tailwind. Duas saídas a avaliar antes de decidir:
+  - **Radix UI puro**, estilizado com o CSS que já existe — ganha as primitivas sem
+    trocar o sistema de estilo;
+  - **shadcn/ui completo**, aceitando Tailwind e reescrevendo o `index.css`.
+  A segunda só se justifica se o número de componentes crescer o bastante para o CSS
+  próprio virar custo. Hoje são treze.
+- **Verificação:** axe sem violações; os percursos por teclado de `accessibility.test.tsx`
+  passando sem alteração; caso novo afirmando que o foco volta ao elemento de origem ao
+  cancelar a exclusão, escrito **antes** da mudança e reprovando com o código atual.
+- **Critérios:** S13, S14 · **Commit:** —
+- **Nota:** depende de decisão de escopo, não de tempo. Registrada como tarefa em aberto
+  porque o fluxo exige que nada seja implementado sem tarefa — e porque a alternativa,
+  descobrir o custo do Tailwind no meio da implementação, é o modo caro de decidir.
+
 ---
 
 ## Rastreabilidade — critérios × tarefas
@@ -500,7 +537,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710`, `dd855d5` | ida e volta pela URL e retorno da exclusão |
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem, formulário e detalhe cobertos |
-| S14 Utilizável por teclado | TASK-WEB-08 | `6d23891` | axe sem violações em 7 telas + fluxos por teclado |
+| S14 Utilizável por teclado | TASK-WEB-08 | `6d23891` | axe sem violações nos 10 estados de tela + fluxos por teclado |
 | S15 Executável pelo README | TASK-DOC-02 | `f1b1065` | clone novo em diretório limpo: 553 testes passam (606 após o M9) |
 | S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27`, `a0bc095` | gate ativo em modules/** e scripts/** |
 | S17 Conexão perdida não derruba o processo | TASK-REV-04 | `badc88c` | `pg_terminate_backend` na conexão ociosa; API continua atendendo |

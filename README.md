@@ -434,6 +434,33 @@ para trás. Quem abortou não recebe saída nem código de retorno e acredita qu
 gravado. A execução seguinte se recupera do órfão — o `TRUNCATE` faz seu trabalho,
 verificado.
 
+**Ordenar ou paginar durante o debounce da busca é desfeito.** [revisão] O temporizador
+de 300 ms captura os filtros do instante em que a tecla foi digitada; qualquer outro
+filtro alterado nesse intervalo é sobrescrito quando ele dispara. Quem digita uma busca e
+clica numa coluna vê a ordenação ser aplicada e voltar sozinha, sem mensagem. É perda de
+atualização entre duas escritas concorrentes no mesmo estado, e a URL — que a SPEC define
+como fonte de verdade — termina num estado que ninguém pediu.
+
+**Página fora da faixa mostra "nenhum usuário cadastrado" e esconde a paginação.**
+[revisão] A API responde `200` com `data: []` para páginas além do fim, e a tela não
+distingue isso de base vazia. Como os controles de paginação estão sob a mesma condição,
+some também o caminho de volta: só editando a URL. Acontece ao excluir o último registro
+da última página, ou ao abrir um link antigo. Encontrado de forma independente por duas
+frentes.
+
+**`?page=1e21` na URL leva a uma tela de erro.** [revisão] `Number.isInteger(1e21)` é
+verdadeiro, então o guarda aceita; `String(1e21)` produz `"1e+21"`, que a API rejeita com
+`400`. O arquivo promete por escrito que valor inválido cai no padrão em vez de virar
+tela de erro — promessa que vale para `abc` e `-5`, mas não para o que sobrevive ao
+`isInteger`.
+
+**A confirmação de exclusão toma o foco e não o devolve.** [revisão] Ao cancelar, o botão
+focado deixa de existir e o foco volta para o `<body>`; depois de excluir, a listagem
+monta na mesma situação. Quem navega por teclado perde a posição no meio do fluxo —
+exatamente o percurso que o critério S14 cobre. É a motivação concreta da tarefa de
+redesenho registrada em `tasks/todo.md` (`TASK-OPT-04`): primitivas acessíveis prontas
+resolvem isso por construção, enquanto a implementação à mão resolve caso a caso.
+
 **A escala completa não foi carregada.** O padrão importa 500 mil linhas para que a
 avaliação seja rápida. As medições acima projetam ~2 minutos para os 10 milhões, mas a
 carga completa em si e a construção dos índices GIN sobre 1,6 milhão de registros não
@@ -486,10 +513,16 @@ Em ordem de valor percebido:
    cada push.
 3. **Teste ponta a ponta com Playwright** sobre um fluxo crítico, com banco, API e
    interface reais.
-4. **Agrupamento de consultas simultâneas** ao serviço de clima.
-5. **Importação retomável**, registrando a última linha processada para continuar de
+4. **Redesenho da interface sobre primitivas acessíveis**, provavelmente Radix UI — e
+   possivelmente shadcn/ui, que é um gerador sobre Radix e Tailwind, não uma dependência.
+   A motivação não é estética: é substituir a acessibilidade de interação escrita à mão,
+   onde a revisão já encontrou o foco não sendo devolvido na confirmação de exclusão.
+   A decisão em aberto é se o ganho justifica trazer Tailwind para um projeto com 624
+   linhas de CSS próprio e paleta já validada. Detalhado em `TASK-OPT-04`.
+5. **Agrupamento de consultas simultâneas** ao serviço de clima.
+6. **Importação retomável**, registrando a última linha processada para continuar de
    onde parou em caso de interrupção.
-6. **Índice de ordenação ascendente**, caso a telemetria mostre uso relevante.
+7. **Índice de ordenação ascendente**, caso a telemetria mostre uso relevante.
 
 ## Documentação do processo
 

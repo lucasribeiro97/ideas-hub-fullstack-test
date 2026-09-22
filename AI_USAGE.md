@@ -258,7 +258,7 @@ Nenhuma implementação foi aceita por parecer correta.
 | **Execução repetida da suíte** | Encontrou três testes instáveis que uma execução só não revelaria |
 | **Navegador real** | Telas, acessibilidade, gráfico e Swagger UI |
 | **Instalação do zero em diretório limpo** | Encontrou dois bugs invisíveis no repositório de trabalho |
-| **axe-core** | Zero violações de acessibilidade em oito telas |
+| **axe-core** | Zero violações em dez estados de tela: listagem, listagem vazia, listagem com erro, cadastro, cadastro com erros, detalhe, confirmação de exclusão, gráfico, clima com resultado e clima sem cidade encontrada |
 | **Auditoria do tráfego no navegador** | O que cada tela pede à API, contado no log do servidor — encontrou três defeitos que a suíte não via |
 | **Instrumentação do `fetch` na página** | O que o navegador dispara e cancela, que o log do servidor não registra — encontrou o quarto |
 | **Inspeção do pacote gerado** | Que o `npm run build` publicava o React de desenvolvimento |
@@ -383,7 +383,7 @@ Requisitos mais importantes, do critério ao commit e à verificação.
 | Registros inválidos explícitos | `TASK-IMPORT-01`, `04` | `43fa84a`, `a0bc095` | Conferência das contagens a cada execução; fixture com sete defeitos |
 | Filtros na URL | `TASK-WEB-03`, `07` | `8c3d710`, `dd855d5` | Ida e volta pela URL; retorno após exclusão preserva a busca |
 | Busca sem disparo por tecla | `TASK-WEB-04` | `6266f2f` | Abort verificado no sinal recebido pelo servidor simulado |
-| Utilizável por teclado | `TASK-WEB-08` | `6d23891` | axe sem violações em sete telas; fluxos percorridos sem mouse |
+| Utilizável por teclado | `TASK-WEB-08` | `6d23891` | axe sem violações nos dez estados de tela; fluxos percorridos sem mouse |
 | Fluxo do frontend | `TASK-WEB-09` | `fb718e4` | Nove percursos sobre API simulada com comportamento real |
 | Tela não faz requisição supérflua nem órfã | — | `bde88c1`, `a224f54` | 14 fluxos percorridos no Chrome contra o log da API: 17 requisições, só os dois erros esperados |
 | Pacote de produção não traz o React de dev | — | `8e7a242` | `bundleType` verificado a cada `npm run build`; guarda provada reintroduzindo a causa |
