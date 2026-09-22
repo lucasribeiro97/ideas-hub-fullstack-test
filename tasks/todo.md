@@ -326,10 +326,10 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S13 · **Commit:** `6f8820a`
 
 ### TASK-WEB-11 — Gráfico de variação de temperatura
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** gráfico Recharts da série horária, com eixos rotulados e responsivo.
 - **Verificação:** renderiza para uma cidade válida e se adapta a viewport estreito.
-- **Critérios:** — · **Commit:** —
+- **Critérios:** — · **Commit:** `f5c3c57`
 
 ---
 
