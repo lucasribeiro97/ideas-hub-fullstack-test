@@ -238,6 +238,8 @@ Nenhuma implementação foi aceita por parecer correta.
 | **Instalação do zero em diretório limpo** | Encontrou dois bugs invisíveis no repositório de trabalho |
 | **axe-core** | Zero violações de acessibilidade em oito telas |
 | **Auditoria do tráfego no navegador** | O que cada tela pede à API, contado no log do servidor — encontrou três defeitos que a suíte não via |
+| **Instrumentação do `fetch` na página** | O que o navegador dispara e cancela, que o log do servidor não registra — encontrou o quarto |
+| **Inspeção do pacote gerado** | Que o `npm run build` publicava o React de desenvolvimento |
 
 ### Três achados que só a verificação produziu
 
@@ -256,8 +258,8 @@ cancelamento virava erro visível na tela — o oposto do requisito.
 
 ### O limite mais caro que encontrei: verificar o resultado não é verificar o caminho
 
-Os três defeitos abaixo escaparam de 553 testes. Nenhum foi sorte: os três têm a mesma
-causa, e a causa é minha.
+Os defeitos abaixo escaparam de 553 testes. Nenhum foi sorte: os três primeiros têm a
+mesma causa, e a causa é minha.
 
 **CORS bloqueando `PATCH` e `DELETE`.** O padrão do `@fastify/cors` libera apenas `GET`,
 `HEAD` e `POST` — os "métodos simples" da especificação —, e o navegador barrava os
@@ -290,6 +292,47 @@ O que mudou na suíte: `tests/requestTraffic.test.tsx` passou a afirmar sobre o 
 e não sobre a tela. É o único lugar onde uma requisição a mais é um defeito. Antes de
 aceitar os quatro casos, reverti as duas correções e **confirmei que os quatro falham** —
 um teste que nunca viu o defeito não prova que o pega.
+
+### O defeito que a auditoria não pegou, e o que faltava para pegar
+
+Depois de tudo isso, ainda sobrava uma requisição cancelada por tela — visível no painel
+de rede como um par "uma falha, uma sucesso" em cada ato. Eu não a tinha encontrado
+porque **auditei pelo log do servidor**, e ela nunca chega lá: nasce e morre em 1ms, do
+lado do navegador.
+
+A investigação teve uma hipótese errada pelo caminho, e foi ela que levou à causa real.
+Instrumentei o `fetch` da página e a pilha apontou `QueryObserver.onSubscribe` duas
+vezes — assinatura do `StrictMode`, que monta cada componente duas vezes em
+desenvolvimento de propósito. Desliguei o `StrictMode`: uma requisição só. Caso
+encerrado, aparentemente — **em desenvolvimento isso é comportamento correto do React, e
+o cancelamento limpo é justamente o que ele serve para revelar.**
+
+Só que o mesmo par aparecia no pacote de produção, onde o `StrictMode` não faz nada.
+Contradição. Fui verificar em que modo o React do pacote estava, e a resposta explicou
+tudo:
+
+> O `.env` da raiz definia `NODE_ENV=development`, escrito para a API. O
+> `vite.config.ts` aponta o `envDir` para essa mesma raiz — decisão deliberada, um
+> arquivo de configuração só para os dois lados. E **o Vite respeita `NODE_ENV` vindo de
+> arquivo `.env`**. O `npm run build` vinha gerando um pacote com o React de
+> desenvolvimento: **920 KB em vez de 672 KB**, com as verificações de dev ativas e o
+> `StrictMode` montando cada tela duas vezes **no pacote publicado**.
+
+A requisição duplicada era o sintoma visível; o defeito era o pacote de produção.
+
+Corrigido tirando `NODE_ENV` do `.env` compartilhado — ela pertence ao processo, não a
+um arquivo lido por duas ferramentas com regras diferentes. A API já assumia
+`development` na ausência dela.
+
+O que impede a regressão: `apps/web/scripts/check-build.mjs`, executado ao final de todo
+`npm run build`. Ele lê o `bundleType` que o próprio React declara — `0` para produção,
+`1` para desenvolvimento — e falha com código 1. Provei que ele reprova reintroduzindo a
+variável no `.env`. Essa falha precisava de guarda automática porque **não se manifesta
+como erro**: o pacote é gerado, a aplicação funciona, e a única pista é o tamanho.
+
+Medido no navegador, com o pacote corrigido: selecionar um usuário passou de duas
+requisições (uma cancelada em 1ms, uma bem-sucedida) para **uma**; excluir passou de três
+para **duas** — o `DELETE` e a recarga da listagem.
 
 O efeito colateral mais interessante foi um teste antigo cair: `leva ao detalhe do
 usuário criado` esperava pelo título "Detalhes do usuário", que é o título das telas de

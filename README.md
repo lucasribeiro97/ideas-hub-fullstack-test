@@ -132,6 +132,14 @@ Um único `.env` na raiz atende os dois aplicativos — a API o lê via
 `node --env-file`, e o Vite via `envDir`. O `.env.example` traz todas as chaves sem
 valores reais.
 
+> **`NODE_ENV` não entra neste arquivo.** O Vite respeita um `NODE_ENV` vindo de arquivo
+> `.env`, e como o mesmo arquivo serve aos dois lados, um `NODE_ENV=development` escrito
+> para a API fazia o `npm run build` do frontend publicar o React de desenvolvimento —
+> 920 KB em vez de 672 KB, com as verificações de dev ativas em produção. A API assume
+> `development` na ausência da variável; quem publicar define `NODE_ENV=production` no
+> ambiente de execução, que é onde ela pertence. O `npm run build` verifica isso
+> sozinho e falha se o pacote sair errado.
+
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `POSTGRES_USER` | `ideas_hub` | Consumida pelo `docker-compose.yml` |
@@ -184,7 +192,7 @@ Dentro de `apps/web`:
 | Comando | O que faz |
 |---|---|
 | `npm run dev` | Sobe a interface |
-| `npm run build` | Gera o build de produção |
+| `npm run build` | Gera o build de produção e **recusa** um pacote que traga o React de desenvolvimento |
 | `npm run preview` | Serve o build |
 | `npm test` | Testes com Testing Library e MSW |
 | `npm run test:coverage` | Testes com cobertura |
