@@ -547,6 +547,14 @@ cd apps/api
 DATABASE_URL="<connection string do Render>" npm run import -- --limit=50000
 ```
 
+Use a **External Database URL** do painel, não a interna: a interna só resolve dentro da
+rede do Render. Ela vem com `?sslmode=require`, e a versão do `pg` usada aqui trata esse
+modo como `verify-full`, ou seja, valida a cadeia do certificado. Os certificados do
+Render são de CA pública e passam. Se em algum ambiente a validação falhar, o diagnóstico
+é `self-signed certificate in certificate chain`, e a saída é trocar para
+`?sslmode=no-verify` **apenas nessa execução de importação** — nunca na variável do
+serviço, porque aí a API passaria a aceitar qualquer certificado.
+
 50 mil linhas produzem cerca de 22 mil usuários, o suficiente para exercitar busca,
 ordenação e paginação. **O volume completo não cabe no plano gratuito:** o banco local
 com 220.873 usuários ocupa 179 MB, dos quais **120 MB são os índices GIN de trigrama** —
