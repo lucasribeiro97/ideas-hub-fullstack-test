@@ -336,12 +336,12 @@ requisito atualiza a SPEC ou o plano primeiro.
 ## M7 — Contrato e documentação
 
 ### TASK-DOC-01 — OpenAPI e Swagger UI
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** documentação derivada dos schemas de validação, cobrindo todos os
   endpoints com exemplos e códigos de erro.
 - **Verificação:** a UI lista os seis endpoints e um exemplo executado responde
   corretamente.
-- **Critérios:** S10 · **Commit:** —
+- **Critérios:** S10 · **Commit:** `914baf6`
 
 ### TASK-DOC-02 — README completo
 - **Estado:** ⬜
@@ -404,7 +404,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | `1cd6440`, `82e54ad` | 6 modos de falha provados em HTTP |
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial), `82e54ad` | ausente de respostas, cabeçalhos e log real |
 | S9 Cache expira e protege | TASK-WEATHER-02 | `958a3ed` | TTL, expiração e stale-if-error testados |
-| S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
+| S10 Contrato documentado | TASK-DOC-01 | `914baf6` | 6 endpoints no Swagger, exemplos executados conferem |
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710`, `dd855d5` | ida e volta pela URL e retorno da exclusão |
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem, formulário e detalhe cobertos |
