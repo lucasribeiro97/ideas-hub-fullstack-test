@@ -36,8 +36,19 @@ function preflight(url: string, method: string, headers: Record<string, string> 
   })
 }
 
+/**
+ * Cabeçalho HTTP pode chegar como texto ou como lista, dependendo de quantas
+ * vezes foi enviado. Converter com `String()` direto produziria
+ * "[object Object]" no caso da lista, e o teste passaria a comparar lixo.
+ */
+function headerAsText(value: unknown): string {
+  if (Array.isArray(value)) return value.join(',')
+
+  return typeof value === 'string' ? value : ''
+}
+
 function allowedMethods(response: { headers: Record<string, unknown> }): string[] {
-  return String(response.headers['access-control-allow-methods'] ?? '')
+  return headerAsText(response.headers['access-control-allow-methods'])
     .split(',')
     .map((method) => method.trim().toUpperCase())
     .filter((method) => method.length > 0)
@@ -80,7 +91,7 @@ describe('verificação prévia de CORS', () => {
       'access-control-request-headers': 'content-type',
     })
 
-    expect(String(response.headers['access-control-allow-headers']).toLowerCase()).toContain(
+    expect(headerAsText(response.headers['access-control-allow-headers']).toLowerCase()).toContain(
       'content-type',
     )
   })
