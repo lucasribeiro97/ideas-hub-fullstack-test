@@ -8,6 +8,9 @@ import { loggerOptions } from './lib/logger.js'
 import { registerErrorHandling } from './lib/error-handler.js'
 import { healthRoutes } from './modules/health/health.routes.js'
 import { usersRoutes } from './modules/users/users.routes.js'
+import { weatherRoutes } from './modules/weather/weather.routes.js'
+import { createTtlCache } from './modules/weather/weather.cache.js'
+import type { WeatherSnapshot } from './modules/weather/weather.schemas.js'
 
 export interface AppDependencies {
   db: Database
@@ -47,8 +50,24 @@ export async function buildApp(env: Env, deps: AppDependencies): Promise<Fastify
 
   registerErrorHandling(app)
 
+  // O cache vive junto da instância da aplicação: reiniciar o processo o
+  // esvazia, o que a SPEC §12 aceita explicitamente.
+  const weatherCache = createTtlCache<WeatherSnapshot>({
+    ttlMs: env.WEATHER_CACHE_TTL_SECONDS * 1000,
+  })
+
   await app.register(healthRoutes)
   await app.register(usersRoutes(deps.db))
+  await app.register(
+    weatherRoutes({
+      client: {
+        baseUrl: env.WEATHER_API_BASE_URL,
+        apiKey: env.WEATHER_API_KEY,
+        timeoutMs: env.WEATHER_TIMEOUT_MS,
+      },
+      cache: weatherCache,
+    }),
+  )
 
   return app
 }
