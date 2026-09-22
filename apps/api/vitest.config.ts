@@ -5,6 +5,19 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
 
+    // Sobe um único Postgres efêmero para toda a execução.
+    globalSetup: ['./tests/helpers/global-setup.ts'],
+
+    // Os testes de integração compartilham o mesmo banco e limpam a tabela
+    // entre casos. Rodar arquivos em paralelo faria uma suíte apagar os dados
+    // da outra no meio da execução, produzindo falha intermitente — o tipo de
+    // teste instável que destrói a confiança na suíte.
+    fileParallelism: false,
+
+    // O start do container entra no tempo do primeiro teste.
+    testTimeout: 30_000,
+    hookTimeout: 60_000,
+
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json-summary'],
