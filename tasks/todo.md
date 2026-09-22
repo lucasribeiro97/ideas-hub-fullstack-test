@@ -387,6 +387,50 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** — · **Commit:** —
 - **Nota:** primeiro item da ordem de corte do plano §5.
 
+### TASK-DEPLOY-01 — Pacote de produção autossuficiente
+- **Estado:** ⬜
+- **Motivação:** `npm run build` gera um `dist/` que **não consegue aplicar migrations**.
+  O `tsc` compila `.ts` e não copia os `.sql` nem o `meta/_journal.json`, então
+  `node dist/db/migrate.js` falha com `Can't find meta/_journal.json file`. Invisível
+  localmente porque `npm run db:migrate` usa `tsx` sobre a árvore de fontes — e `tsx` é
+  `devDependency`, logo nem esse comando sobrevive a um `npm ci --omit=dev`.
+- **Aceite:**
+  1. `node dist/db/migrate.js` aplica as migrations num banco vazio, sem `tsx` instalado.
+  2. O `dist/` contém os arquivos de migration e o journal.
+  3. O build falha se o `dist/` sair incompleto — o defeito não pode voltar em silêncio.
+- **Verificação:** build limpo, `npm ci --omit=dev`, migration aplicada contra banco
+  descartável, e a verificação provada reprovando com o `dist/` incompleto.
+- **Critérios:** S1, S15 · **Commit:** —
+
+### TASK-DEPLOY-02 — Blueprint do Render versionado
+- **Estado:** ⬜
+- **Aceite:**
+  1. `render.yaml` na raiz descrevendo os três recursos: Postgres 16, a API como Web
+     Service e o frontend como Static Site.
+  2. Migrations aplicadas automaticamente antes de cada deploy.
+  3. `GET /health` como health check da API.
+  4. `NODE_ENV=production` definido **no ambiente da plataforma**, nunca em arquivo lido
+     pelo Vite.
+  5. Nenhum segredo versionado: a chave da WeatherAPI entra pelo painel.
+  6. O README documenta a ordem de deploy e a carga de dados.
+- **Dependência circular a resolver, não esconder.** A API precisa da origem do frontend
+  para o `CORS_ORIGIN`, e o frontend precisa da URL da API em tempo de *build*, porque
+  `VITE_API_URL` é embutida no pacote. Uma das duas sempre existe antes da outra. O
+  blueprint deixa as duas como preenchimento manual, com a ordem documentada, em vez de
+  fingir automação que a plataforma não oferece.
+- **Carga de dados:** o CSV de 935 MB não sobe para lugar nenhum. A demonstração usa um
+  subconjunto importado da máquina local apontando `DATABASE_URL` para o banco
+  hospedado. O banco atual, com 220.873 usuários, ocupa 179 MB — dos quais **120 MB são
+  os índices GIN de trigrama** —, o que é apertado para o plano gratuito de 0,5 GB.
+- **Verificação:** aplicação acessível pela URL pública, com listagem, busca, CRUD e
+  clima funcionando; `/docs` respondendo; chave da WeatherAPI ausente de qualquer
+  resposta ao navegador.
+- **Critérios:** — · **Commit:** —
+- **Nota:** diferencial opcional do enunciado ("deploy de demonstração"), que declara
+  explicitamente não ser necessário publicar. O plano gratuito do Render hiberna o
+  serviço após inatividade, então o primeiro acesso de quem avaliar será lento — o
+  README precisa avisar, senão a lentidão é lida como defeito.
+
 ### TASK-OPT-04 — Redesenho da interface, possivelmente com shadcn/ui
 - **Estado:** ⬜
 - **Motivação:** não é estética. O enunciado diz que design sofisticado não é valorizado
