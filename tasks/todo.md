@@ -222,21 +222,21 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S2 · **Commit:** `f23e16b`
 
 ### TASK-IMPORT-04 — Relatório e flag `--limit`
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** saída com lidos, importados, descartados por duplicidade e rejeitados por
   invalidez, com os números fechando. `--limit` com padrão 500.000 e `0` para o arquivo
   completo. Rejeitados identificados pelo número da linha.
 - **Verificação:** `lidos == importados + duplicados + rejeitados` em fixture e na carga
   de 500k.
-- **Critérios:** S3 · **Commit:** —
+- **Critérios:** S3 · **Commit:** `a0bc095`
 
 ### TASK-IMPORT-05 — Testes da importação
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** fixture pequena com duplicatas e defeitos propositais — email vazio,
   formato inválido, coluna faltando, UUID inválido. O dataset real não exercita esses
   caminhos (SPEC §3), então são cobertos aqui.
 - **Verificação:** `npm test -- import` verde; cobertura do script ≥ 90%.
-- **Critérios:** S2, S3, S16 · **Commit:** —
+- **Critérios:** S2, S3, S16 · **Commit:** `a0bc095`
 
 ---
 
@@ -396,8 +396,8 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | Critério | Tarefas | Commit | Verificação |
 |---|---|---|---|
 | S1 Banco e migrations | TASK-INFRA-01, TASK-INFRA-02, TASK-DB-01 | `6449c27`, `4e80b2f` | migration em base vazia + reexecução |
-| S2 Importação reproduzível | TASK-IMPORT-02, TASK-IMPORT-03, TASK-IMPORT-05 | `cba066d`, `f23e16b` | dupla execução não insere nem altera |
-| S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | — | os números fecham |
+| S2 Importação reproduzível | TASK-IMPORT-02, TASK-IMPORT-03, TASK-IMPORT-05 | `cba066d`, `f23e16b`, `a0bc095` | dupla execução: 0 inseridos, conjunto idêntico |
+| S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | `43fa84a`, `a0bc095` | conferência automática a cada execução |
 | S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7`, `bcf8bf8` | 409 no POST e no PATCH, inclusive em caixa diferente |
 | S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f`, `761017d` | 22 testes na API; uso espontâneo do GIN só com volume, no M4 |
 | S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial), `b05d640` | provado nos cinco endpoints de usuários |
@@ -410,4 +410,4 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | — | provocação manual |
 | S14 Utilizável por teclado | TASK-WEB-08 | — | percurso sem mouse |
 | S15 Executável pelo README | TASK-DOC-02 | — | setup em diretório limpo |
-| S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27` | gate provado falhando: exit 1 |
+| S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27`, `a0bc095` | gate ativo em modules/** e scripts/** |
