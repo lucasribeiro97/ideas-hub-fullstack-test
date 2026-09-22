@@ -65,6 +65,50 @@ export class UserEmailTakenError extends AppError {
   }
 }
 
+/*
+ * Erros da integração climática (SPEC §6).
+ *
+ * Existem para que a origem externa nunca dite o status da nossa API: o que
+ * quer que a WeatherAPI responda, quem consome esta API vê um dos códigos
+ * abaixo, com significado estável.
+ */
+
+export class WeatherCityNotFoundError extends AppError {
+  readonly code = 'WEATHER_CITY_NOT_FOUND'
+  readonly httpStatus = 404
+
+  constructor(message = 'Cidade não encontrada.') {
+    super(message)
+  }
+}
+
+export class WeatherTimeoutError extends AppError {
+  readonly code = 'WEATHER_TIMEOUT'
+  readonly httpStatus = 504
+
+  constructor(message = 'O serviço de clima demorou a responder. Tente novamente.') {
+    super(message)
+  }
+}
+
+export class WeatherRateLimitedError extends AppError {
+  readonly code = 'WEATHER_RATE_LIMITED'
+  readonly httpStatus = 429
+
+  constructor(message = 'Limite de consultas ao serviço de clima atingido. Tente mais tarde.') {
+    super(message)
+  }
+}
+
+export class WeatherUpstreamError extends AppError {
+  readonly code = 'WEATHER_UPSTREAM_ERROR'
+  readonly httpStatus = 502
+
+  constructor(message = 'O serviço de clima está indisponível no momento.') {
+    super(message)
+  }
+}
+
 /**
  * Código SQLSTATE de violação de unicidade.
  *
