@@ -388,6 +388,7 @@ Requisitos mais importantes, do critério ao commit e à verificação.
 | Pacote compilado aplica migrations | `TASK-DEPLOY-01` | `592c633` | `node dist/db/migrate.js` contra banco descartável, sem `tsx` instalado |
 | Infraestrutura versionada | `TASK-DEPLOY-02` | `c42cce8`, `af6809f`, `a26222a` | `render.yaml` revisável; os quatro comandos ensaiados antes de publicar |
 | Aplicação publicada funciona | `TASK-DEPLOY-02` | — | Onze fluxos percorridos no ambiente no ar, contando as requisições de cada um |
+| Publicação depende da verificação | `TASK-DEPLOY-03` | `1a14661`, `ea618ba` | A primeira execução falhou no lint e pulou a publicação; a segunda passou e disparou os hooks |
 | Fluxo do frontend | `TASK-WEB-09` | `fb718e4` | Nove percursos sobre API simulada com comportamento real |
 | Tela não faz requisição supérflua nem órfã | — | `bde88c1`, `a224f54` | 14 fluxos percorridos no Chrome contra o log da API: 17 requisições, só os dois erros esperados |
 | Pacote de produção não traz o React de dev | — | `8e7a242` | `bundleType` verificado a cada `npm run build`; guarda provada reintroduzindo a causa |
@@ -613,6 +614,12 @@ global, então em vez de "comando não encontrado" o erro apareceu como **falta 
 O sintoma apontava para uma dependência ausente; a causa era a variável de ambiente que
 nós mesmos definimos. Só fechou depois de reproduzir localmente com
 `NODE_ENV=production npm ci` e contar os pacotes.
+
+**A esteira encontrou o primeiro defeito na primeira execução**, e o defeito era meu: eu
+havia criado dois scripts `.mjs` durante o trabalho de deploy e rodado typecheck, build e
+as suítes — mas não o lint. A configuração do ESLint não cobria essa extensão, e o erro
+ficou na minha máquina até alguém verificar tudo de uma vez. É o argumento mais curto a
+favor de integração contínua que eu poderia ter recebido.
 
 **A lição.** Ensaio valida o que o seu ambiente consegue reproduzir. A plataforma tem
 regras próprias que só aparecem quando ela executa — e tratar o primeiro deploy como

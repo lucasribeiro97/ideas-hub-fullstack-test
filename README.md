@@ -50,6 +50,7 @@ em [Deploy de demonstração](#deploy-de-demonstração).
 - [Decisões técnicas](#decisões-técnicas)
 - [Medições](#medições)
 - [Limitações conhecidas](#limitações-conhecidas)
+- [Integração contínua](#integração-contínua)
 - [Deploy de demonstração](#deploy-de-demonstração)
 - [Com mais tempo](#com-mais-tempo)
 - [Documentação do processo](#documentação-do-processo)
@@ -532,6 +533,32 @@ independentes.
 
 **Sem autenticação**, conforme o enunciado determina.
 
+## Integração contínua
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda a cada push na `main` e em
+cada pull request:
+
+| Etapa | O que faz |
+|---|---|
+| **API** | `typecheck`, `lint` e testes com cobertura, com PostgreSQL efêmero via Testcontainers |
+| **Frontend** | `typecheck`, `lint`, testes com cobertura e o `build`, que carrega a guarda do `bundleType` |
+| **Publicar** | Chama o Deploy Hook dos dois serviços do Render |
+
+**A publicação depende da verificação.** É a diferença em relação ao deploy automático da
+plataforma, que publicaria a cada push passando ou não nos testes. O passo de publicação
+só roda em push na `main` — nunca a partir de um pull request, que colocaria código não
+revisado no ar.
+
+As URLs dos hooks são segredos do repositório (`RENDER_DEPLOY_HOOK_API` e
+`RENDER_DEPLOY_HOOK_WEB`). Se algum faltar, o workflow **falha com mensagem clara**: sem
+essa checagem, o `curl` receberia uma URL vazia e o job passaria em verde sem publicar
+nada, que é o pior desfecho possível para um passo de publicação.
+
+**O primeiro retorno veio na primeira execução.** Ela falhou no lint da API, apontando
+dois arquivos `.mjs` que a configuração do ESLint não cobria. Eu havia criado esses
+scripts e rodado typecheck, build e as suítes — mas não o lint. O erro estava na máquina
+desde então, e só apareceu quando alguém verificou tudo de uma vez.
+
 ## Deploy de demonstração
 
 Diferencial opcional: o enunciado declara que **não é necessário publicar a aplicação**.
@@ -605,13 +632,16 @@ Os quatro comandos foram ensaiados localmente antes de publicar, e mesmo assim:
    bloqueado por ser gerenciado pelo blueprint e mantém o valor do momento da criação;
    dois syncs não mudaram nada. É por isso que a correção acima precisa existir também
    como variável de ambiente, que continua editável.
-4. **Sem conectar o provedor Git, nada é automático.** Criado a partir da URL do
-   repositório público, o blueprint não recebe aviso de push: cada atualização exigia
-   sync manual e deploy manual. **Resolvido depois**, instalando o app do Render no
-   GitHub com escopo restrito a este repositório — "Only select repositories", não a
-   conta inteira. A permissão concedida inclui escrita em actions, checks, deployments,
-   issues, pull requests, hooks e workflows, que é o escopo padrão do app; limitar o
-   repositório é o que mantém esse alcance contido.
+4. **Conectar o provedor Git depois não religa o que já existe.** Criado a partir da URL
+   do repositório público, o blueprint não recebe aviso de push. Instalar o app do
+   Render no GitHub — com escopo restrito a este repositório, e não à conta inteira —
+   **não resolveu**: um push real depois da instalação não disparou deploy nenhum, e o
+   botão que religaria o blueprint está desabilitado. O `Auto-Deploy` do serviço sempre
+   esteve em "On Commit"; o que falta é o Render saber dos pushes.
+
+   A saída foi o **Deploy Hook** de cada serviço, chamado pela
+   [esteira de verificação](#integração-contínua) — que acabou sendo melhor que o deploy
+   automático, porque condiciona a publicação aos testes passarem.
 
 ### O que esperar do plano gratuito
 

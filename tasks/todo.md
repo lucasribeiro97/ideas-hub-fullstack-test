@@ -372,8 +372,10 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** — · **Commit:** —
 
 ### TASK-OPT-02 — Pipeline de CI
-- **Estado:** ⬜ absorvida por `TASK-DEPLOY-03`, que roda as mesmas verificações e
-  ainda condiciona a publicação a elas
+- **Estado:** ✅ entregue por `TASK-DEPLOY-03`, que roda as mesmas verificações e ainda
+  condiciona a publicação a elas. Testcontainers funcionou no runner, então o plano de
+  contingência do risco R4 — cair para o serviço Postgres do próprio Actions — não foi
+  necessário
 - **Aceite:** GitHub Actions com lint, typecheck, testes e cobertura por push. Se
   Testcontainers não funcionar no runner, cair para serviço Postgres do próprio Actions
   (risco R4, questão Q4).
@@ -444,7 +446,7 @@ requisito atualiza a SPEC ou o plano primeiro.
   README precisa avisar, senão a lentidão é lida como defeito.
 
 ### TASK-DEPLOY-03 — Publicação automática com verificação antes
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Motivação:** o blueprint foi criado a partir da URL do repositório público, e instalar
   o app do Render no GitHub depois **não religa** um recurso existente — verificado com um
   push real, que não disparou deploy nenhum. Recriar o blueprint resolveria, mas mudaria
@@ -461,10 +463,11 @@ requisito atualiza a SPEC ou o plano primeiro.
   4. As URLs dos hooks são segredos do repositório, nunca versionadas.
   5. Se um segredo faltar, o workflow **falha com mensagem clara** em vez de fingir que
      publicou.
-- **Verificação:** execução verde visível no repositório, seguida de deploy novo nos dois
-  serviços sem ninguém apertar nada; e uma execução vermelha provando que a publicação
-  não acontece com teste quebrado.
-- **Critérios:** — · **Commit:** —
+- **Verificação:** a primeira execução **falhou** no lint da API e a publicação foi
+  pulada — prova de que a condição funciona, obtida sem precisar quebrar nada de
+  propósito. A segunda passou nas três etapas e disparou os dois hooks; a API voltou com
+  `uptimeSeconds: 69`, confirmando que o deploy aconteceu de fato.
+- **Critérios:** — · **Commit:** `1a14661`, `ea618ba`
 - **Nota:** cobre também o diferencial de integração contínua do enunciado, que estava
   registrado como `TASK-OPT-02`.
 
@@ -629,3 +632,4 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S22 Pacote de produção com o React correto | TASK-REV-02 | `8e7a242` | `bundleType` verificado a cada build |
 | Pacote compilado aplica migrations | TASK-DEPLOY-01 | `592c633` | `node dist/db/migrate.js` contra banco descartável, sem `tsx` |
 | Infraestrutura versionada e publicada | TASK-DEPLOY-02 | `592c633`, `c42cce8`, `af6809f`, `a26222a` | aplicação no ar, com os fluxos percorridos no navegador |
+| Publicação condicionada à verificação | TASK-DEPLOY-03, TASK-OPT-02 | `1a14661`, `ea618ba` | execução vermelha pulou a publicação; a verde disparou os dois hooks |
