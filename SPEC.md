@@ -313,8 +313,22 @@ Consolidados no README ao final; a forma pretendida é:
 
 ## 11. Convenções
 
+### Idioma
+
+| O quê | Idioma | Por quê |
+|---|---|---|
+| Identificadores de código — funções, variáveis, parâmetros, tipos, arquivos, propriedades CSS | **Inglês** | Alinha com as bibliotecas e com o próprio `users`/`email`/`created_at` do schema. Misturar idiomas na mesma expressão (`criarBanco(databaseUrl)`) piora a leitura |
+| Campos do contrato da API e do banco | Inglês | Já definidos assim na §6 e §7 |
+| Comentários e descrições de teste | Português | São prosa dirigida a quem lê e avalia o projeto |
+| Mensagens de erro ao usuário | Português | A interface é em português (§12) |
+| Mensagens de commit e documentação | Português | Mesma razão |
+
+A regra prática: **o que o compilador lê é inglês; o que uma pessoa lê é português.**
+
+### Demais convenções
+
 - Commits em português, no formato `tipo: descrição`, com fase identificável
-  (`spec:`, `plan:`, `tasks:`, `feat:`, `test:`, `docs:`, `chore:`).
+  (`spec:`, `plan:`, `tasks:`, `feat:`, `test:`, `docs:`, `chore:`, `refactor:`).
 - Nenhum código é escrito sem uma tarefa correspondente em `tasks/todo.md`.
 - Mudança de requisito atualiza primeiro a especificação ou o plano, em commit próprio,
   antes do código.
