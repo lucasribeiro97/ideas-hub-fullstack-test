@@ -273,11 +273,11 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S12 · **Commit:** `6266f2f`
 
 ### TASK-WEB-05 — Estados de carregamento, vazio e erro
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** os três estados presentes e visualmente distintos na listagem. Lista vazia
   por filtro diz algo diferente de lista vazia por base sem dados.
 - **Verificação:** provocar cada estado manualmente, inclusive derrubando a API.
-- **Critérios:** S13 · **Commit:** —
+- **Critérios:** S13 · **Commit:** `2a454d1`
 
 ### TASK-WEB-06 — Formulário de cadastro e edição
 - **Estado:** ⬜
@@ -407,7 +407,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710` (parcial) | ida e volta pela URL testada; falta detalhe |
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
-| S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | — | provocação manual |
+| S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem coberta; faltam formulário e clima |
 | S14 Utilizável por teclado | TASK-WEB-08 | — | percurso sem mouse |
 | S15 Executável pelo README | TASK-DOC-02 | — | setup em diretório limpo |
 | S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27`, `a0bc095` | gate ativo em modules/** e scripts/** |
