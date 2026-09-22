@@ -178,7 +178,8 @@ describe('busca', () => {
     )
     renderAt('/users?search=inexistente')
 
-    expect(await screen.findByText(/nenhum usuário encontrado para "inexistente"/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /nenhum usuário encontrado/i })).toBeInTheDocument()
+    expect(screen.getByText(/a busca por "inexistente" não retornou/i)).toBeInTheDocument()
   })
 
   // Lista vazia por filtro e base vazia são situações diferentes: a primeira
@@ -191,7 +192,7 @@ describe('busca', () => {
     )
     renderAt('/users')
 
-    expect(await screen.findByText(/nenhum usuário cadastrado ainda/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /nenhum usuário cadastrado/i })).toBeInTheDocument()
   })
 })
 

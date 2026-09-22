@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { render, renderHook, screen, waitFor } from '@testing-library/react'
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse, delay } from 'msw'
 import { MemoryRouter } from 'react-router-dom'
@@ -233,6 +233,31 @@ describe('sincronia URL → field', () => {
     await waitFor(() => {
       expect(result.current.inputValue).toBe('lima')
     })
+  })
+
+  /*
+   * O caso que quebrava: o temporizador pendente ainda carregava o texto
+   * antigo e reescrevia a URL logo depois de ela ter sido limpa, desfazendo a
+   * ação de quem clicou em "limpar busca".
+   */
+  it('mudança externa cancela a propagação pendente', async () => {
+    const received: string[] = []
+    const { result, rerender } = renderHook(
+      ({ value }) =>
+        useSearchInput({ value, onDebouncedChange: (s) => received.push(s), delayMs: 40 }),
+      { initialProps: { value: 'inexistente' } },
+    )
+
+    // Alguém digita, e antes de o debounce disparar a busca é limpa de fora.
+    act(() => {
+      result.current.setInputValue('inexistent')
+    })
+    rerender({ value: '' })
+
+    await new Promise((resolve) => setTimeout(resolve, 120))
+
+    expect(received).toEqual([])
+    expect(result.current.inputValue).toBe('')
   })
 
   it('não reescreve a URL com o valor que acabou de vir dela', async () => {

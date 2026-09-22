@@ -293,3 +293,74 @@ tbody tr:last-child td {
   display: flex;
   gap: 0.5rem;
 }
+
+.list-status {
+  min-height: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.state {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: calc(var(--spacing) * 2);
+  text-align: center;
+  background: var(--color-surface);
+}
+
+.state--error {
+  border-color: var(--color-danger);
+}
+
+.state__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+.state__description {
+  margin: 0 auto;
+  max-width: 40rem;
+  color: var(--color-text-muted);
+}
+
+.state__action {
+  margin-top: var(--spacing);
+}
+
+/* Dados da consulta anterior enquanto a próxima carrega. A opacidade sinaliza
+   que o conteúdo está desatualizado sem removê-lo da tela, o que evitaria o
+   salto de layout. */
+.is-stale {
+  opacity: 0.6;
+  transition: opacity 150ms ease;
+}
+
+.skeleton__bar {
+  display: block;
+  height: 0.75rem;
+  border-radius: var(--radius);
+  background: var(--color-border);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Quem prefere menos movimento não recebe a animação pulsante. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton__bar {
+    animation: none;
+  }
+
+  .is-stale {
+    transition: none;
+  }
+}
