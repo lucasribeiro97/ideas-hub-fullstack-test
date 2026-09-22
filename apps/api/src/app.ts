@@ -41,7 +41,18 @@ export async function buildApp(env: Env, deps: AppDependencies): Promise<Fastify
   app.setValidatorCompiler(validatorCompiler)
   app.setSerializerCompiler(serializerCompiler)
 
-  await app.register(cors, { origin: env.CORS_ORIGIN })
+  await app.register(cors, {
+    origin: env.CORS_ORIGIN,
+    // Os métodos precisam ser declarados: o padrão do plugin libera apenas
+    // GET, HEAD e POST — os "métodos simples" da especificação de CORS —, e o
+    // navegador bloqueia PATCH e DELETE na verificação prévia antes mesmo de
+    // a requisição sair.
+    //
+    // Não foi detectado pelos testes de integração porque `app.inject()` não
+    // simula um navegador e ignora CORS por completo. Só apareceu ao excluir
+    // um usuário pela interface.
+    methods: ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  })
 
   // Devolve o identificador ao cliente para que um erro relatado por quem usa
   // a API possa ser localizado no log.
