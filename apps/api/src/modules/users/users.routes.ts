@@ -1,11 +1,12 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import type { Database } from '../../db/client.js'
-import { createUser, getUserById, listUsers } from './users.service.js'
+import { createUser, getUserById, listUsers, updateUser } from './users.service.js'
 import {
   createUserBodySchema,
   listUsersQuerySchema,
   listUsersResponseSchema,
+  updateUserBodySchema,
   userIdParamSchema,
   userResponseSchema,
 } from './users.schemas.js'
@@ -62,6 +63,20 @@ export function usersRoutes(db: Database): FastifyPluginAsync {
         },
       },
       async (request) => getUserById(db, request.params.id),
+    )
+
+    route.patch(
+      '/users/:id',
+      {
+        schema: {
+          tags: ['users'],
+          summary: 'Atualiza um usuário',
+          params: userIdParamSchema,
+          body: updateUserBodySchema,
+          response: { 200: userResponseSchema },
+        },
+      },
+      async (request) => updateUser(db, request.params.id, request.body),
     )
   }
 }

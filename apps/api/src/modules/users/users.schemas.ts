@@ -43,6 +43,17 @@ export const createUserBodySchema = z.object({
 export type CreateUserInput = z.infer<typeof createUserBodySchema>
 
 /**
+ * Atualização parcial: todos os campos são opcionais.
+ *
+ * A exigência de ao menos um campo é verificada no service, e não por
+ * `.refine()` aqui, para manter o schema como objeto simples — o gerador de
+ * OpenAPI do M7 lida melhor com isso do que com schema embrulhado em efeito.
+ */
+export const updateUserBodySchema = createUserBodySchema.partial()
+
+export type UpdateUserInput = z.infer<typeof updateUserBodySchema>
+
+/**
  * Identificador na rota.
  *
  * Validar aqui é o que separa "id malformado" de "usuário inexistente": sem

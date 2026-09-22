@@ -17,7 +17,18 @@ export const users = pgTable(
     email: text('email').notNull(),
     phone: text('phone'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    // `$onUpdate` é do Drizzle, não do banco: garante que qualquer UPDATE
+    // renove o campo sem depender de cada chamada lembrar de fazê-lo.
+    //
+    // Usa `now()` do Postgres em vez de `new Date()` do Node de propósito:
+    // `created_at` vem do relógio do banco, e misturar as duas fontes faria
+    // `updated_at` cair antes de `created_at` sempre que os relógios
+    // divergissem — o que acontece quando API e banco rodam em máquinas
+    // diferentes.
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => sql`now()`),
   },
   (table) => [
     // Unicidade case-insensitive preservando o valor original (premissa P4).

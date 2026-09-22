@@ -1,13 +1,14 @@
 import { eq, sql } from 'drizzle-orm'
 import type { Database } from '../../db/client.js'
 import { firstOrThrow } from '../../lib/rows.js'
-import { UserNotFoundError } from '../../lib/errors.js'
+import { UserNotFoundError, ValidationError } from '../../lib/errors.js'
 import { users } from '../../db/schema.js'
 import {
   toUserResponse,
   type CreateUserInput,
   type ListUsersQuery,
   type ListUsersResponse,
+  type UpdateUserInput,
   type UserResponse,
 } from './users.schemas.js'
 import { buildOrderBy, buildSearchCondition } from './users.query.js'
@@ -81,4 +82,32 @@ export async function listUsers(db: Database, query: ListUsersQuery): Promise<Li
       totalPages: Math.ceil(total / query.perPage),
     },
   }
+}
+
+/**
+ * Atualiza parcialmente um usuário.
+ *
+ * Trocar o email para um já usado por outro usuário viola o índice único e
+ * vira 409 no tratamento de erros. Manter o próprio email não viola nada: o
+ * índice compara a linha com as demais, e ela não conflita consigo mesma —
+ * comportamento do Postgres, coberto por teste para não regredir caso alguém
+ * acrescente uma verificação manual de unicidade no futuro.
+ */
+export async function updateUser(
+  db: Database,
+  id: string,
+  input: UpdateUserInput,
+): Promise<UserResponse> {
+  if (Object.keys(input).length === 0) {
+    throw new ValidationError(
+      [{ field: '(raiz)', message: 'informe ao menos um campo para atualizar' }],
+    )
+  }
+
+  const updated = await db.update(users).set(input).where(eq(users.id, id)).returning()
+
+  // Array vazio aqui significa que o WHERE não casou: o usuário não existe.
+  if (updated.length === 0) throw new UserNotFoundError()
+
+  return toUserResponse(firstOrThrow(updated, 'update não retornou a linha alterada'))
 }
