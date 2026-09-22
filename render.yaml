@@ -1,0 +1,70 @@
+# Blueprint do Render — deploy de demonstração.
+#
+# Descreve os três recursos da aplicação: o Postgres, a API e o frontend. É
+# versionado para que a infraestrutura da demonstração seja revisável como o
+# resto do projeto, e para que a publicação não dependa de cliques lembrados de
+# memória.
+#
+# O deploy é um diferencial opcional do enunciado, que declara explicitamente
+# não ser necessário publicar. Os passos e as ressalvas estão no README, seção
+# "Deploy de demonstração".
+
+databases:
+  - name: ideas-hub-db
+    plan: free
+    postgresMajorVersion: "16"
+    # O schema exige pg_trgm, criada pela migration 0000. O Postgres gerenciado
+    # do Render permite a extensão; a migration falha em voz alta se não
+    # permitisse, em vez de degradar a busca em silêncio.
+
+services:
+  - type: web
+    name: ideas-hub-api
+    runtime: node
+    plan: free
+    rootDir: apps/api
+    buildCommand: npm ci && npm run build
+    # As migrations rodam antes de o tráfego chegar à nova versão. Usam o
+    # pacote compilado, e não `tsx`, que é dependência de desenvolvimento e não
+    # existe aqui — foi por isso que o build passou a copiar os .sql para dist/.
+    preDeployCommand: npm run db:migrate:dist
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      # Precisa vir do ambiente, nunca de arquivo .env: o mesmo arquivo é lido
+      # pelo Vite, e um NODE_ENV escrito para a API faria o frontend publicar o
+      # React de desenvolvimento.
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ideas-hub-db
+          property: connectionString
+      # Preenchidas no painel, não aqui:
+      #  - WEATHER_API_KEY é segredo e não entra em arquivo versionado;
+      #  - CORS_ORIGIN é a URL do frontend, que só existe depois do primeiro
+      #    deploy dele. A ordem está documentada no README.
+      - key: WEATHER_API_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+
+  - type: web
+    name: ideas-hub-web
+    runtime: static
+    rootDir: apps/web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Embutida no pacote em tempo de build, não lida em execução — trocar de
+      # valor exige reconstruir o frontend, e é isso que cria a ordem de deploy
+      # descrita no README.
+      - key: VITE_API_URL
+        sync: false
+    routes:
+      # Aplicação de página única: qualquer caminho serve o index.html, senão
+      # abrir /users direto ou recarregar a página devolve 404 — e manter os
+      # filtros na URL é um requisito do enunciado.
+      - type: rewrite
+        source: /*
+        destination: /index.html
