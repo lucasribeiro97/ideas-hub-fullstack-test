@@ -390,6 +390,31 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** — · **Commit:** —
 - **Nota:** primeiro item da ordem de corte do plano §5.
 
+### TASK-WEB-12 — Ajustes de leitura na interface
+- **Estado:** ⬜
+- **Motivação:** três pontos concretos, e nenhum deles é estética por estética. O
+  formulário fica espremido à esquerda numa janela larga, com mais da metade da tela
+  vazia. A confirmação de exclusão toma o foco e não devolve — defeito de acessibilidade
+  encontrado pela revisão, e acessibilidade é critério pontuado. E os estados vazios
+  ficam apertados contra o conteúdo ao redor.
+- **Escopo deliberadamente estreito:** CSS próprio e um componente. **Sem** biblioteca de
+  componentes, sem trocar o sistema de estilo. O enunciado pede clareza e consistência,
+  não sofisticação, e avisa para evitar abstração sem uso concreto — trazer Tailwind e
+  Radix para 13 componentes e 624 linhas de CSS que funcionam seria exatamente isso. A
+  avaliação dessa troca está em `TASK-OPT-04`, para depois da entrega.
+- **Aceite:**
+  1. O formulário tem largura máxima legível e não se espalha nem se espreme conforme a
+     janela.
+  2. Ao cancelar a exclusão, o foco volta ao botão que abriu a confirmação; após excluir,
+     vai para o conteúdo principal.
+  3. Zero violações do axe nos dez estados de tela — o patamar atual não pode regredir.
+  4. A paleta do gráfico e os tokens de cor validados permanecem intocados.
+  5. As dez asserções de teste que dependem de classe CSS continuam válidas.
+- **Verificação:** suíte completa verde; caso novo afirmando a restauração do foco,
+  escrito antes da mudança e reprovando com o código atual; telas conferidas no navegador
+  em janela larga e estreita.
+- **Critérios:** S13, S14 · **Commit:** —
+
 ### TASK-DEPLOY-01 — Pacote de produção autossuficiente
 - **Estado:** ✅
 - **Motivação:** `npm run build` gera um `dist/` que **não consegue aplicar migrations**.
