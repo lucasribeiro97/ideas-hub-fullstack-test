@@ -6,6 +6,7 @@ import type { Database } from './db/client.js'
 import type { Env } from './lib/env.js'
 import { loggerOptions } from './lib/logger.js'
 import { registerErrorHandling } from './lib/error-handler.js'
+import { registerOpenApi } from './lib/openapi.js'
 import { healthRoutes } from './modules/health/health.routes.js'
 import { usersRoutes } from './modules/users/users.routes.js'
 import { weatherRoutes } from './modules/weather/weather.routes.js'
@@ -49,6 +50,10 @@ export async function buildApp(env: Env, deps: AppDependencies): Promise<Fastify
   })
 
   registerErrorHandling(app)
+
+  // Antes das rotas: o plugin precisa observar cada uma sendo registrada para
+  // derivar o contrato a partir dos schemas.
+  await registerOpenApi(app)
 
   // O cache vive junto da instância da aplicação: reiniciar o processo o
   // esvazia, o que a SPEC §12 aceita explicitamente.

@@ -8,8 +8,9 @@ import type { FastifyInstance } from 'fastify'
  * docker compose, que é quem precisa dessa informação.
  */
 export async function healthRoutes(app: FastifyInstance): Promise<void> {
-  app.get('/health', async () => ({
-    status: 'ok',
-    uptimeSeconds: Math.floor(process.uptime()),
-  }))
+  app.get(
+    '/health',
+    { schema: { tags: ['health'], summary: 'Verifica se o servidor está no ar' } },
+    async () => ({ status: 'ok', uptimeSeconds: Math.floor(process.uptime()) }),
+  )
 }

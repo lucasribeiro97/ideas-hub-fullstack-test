@@ -2,6 +2,13 @@ import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import type { Database } from '../../db/client.js'
 import {
+  commonErrorResponses,
+  conflictResponse,
+  noContentResponse,
+  notFoundResponse,
+  validationResponse,
+} from '../../lib/error-schemas.js'
+import {
   createUser,
   deleteUser,
   getUserById,
@@ -35,7 +42,12 @@ export function usersRoutes(db: Database): FastifyPluginAsync {
           tags: ['users'],
           summary: 'Cadastra um usuário',
           body: createUserBodySchema,
-          response: { 201: userResponseSchema },
+          response: {
+            201: userResponseSchema,
+            ...validationResponse,
+            ...conflictResponse,
+            ...commonErrorResponses,
+          },
         },
       },
       async (request, reply) => {
@@ -52,7 +64,7 @@ export function usersRoutes(db: Database): FastifyPluginAsync {
           tags: ['users'],
           summary: 'Lista e pesquisa usuários',
           querystring: listUsersQuerySchema,
-          response: { 200: listUsersResponseSchema },
+          response: { 200: listUsersResponseSchema, ...commonErrorResponses },
         },
       },
       async (request) => listUsers(db, request.query),
@@ -65,7 +77,7 @@ export function usersRoutes(db: Database): FastifyPluginAsync {
           tags: ['users'],
           summary: 'Busca um usuário pelo ID',
           params: userIdParamSchema,
-          response: { 200: userResponseSchema },
+          response: { 200: userResponseSchema, ...notFoundResponse, ...commonErrorResponses },
         },
       },
       async (request) => getUserById(db, request.params.id),
@@ -79,7 +91,13 @@ export function usersRoutes(db: Database): FastifyPluginAsync {
           summary: 'Atualiza um usuário',
           params: userIdParamSchema,
           body: updateUserBodySchema,
-          response: { 200: userResponseSchema },
+          response: {
+            200: userResponseSchema,
+            ...validationResponse,
+            ...conflictResponse,
+            ...notFoundResponse,
+            ...commonErrorResponses,
+          },
         },
       },
       async (request) => updateUser(db, request.params.id, request.body),
@@ -92,6 +110,7 @@ export function usersRoutes(db: Database): FastifyPluginAsync {
           tags: ['users'],
           summary: 'Remove um usuário',
           params: userIdParamSchema,
+          response: { ...noContentResponse, ...notFoundResponse, ...commonErrorResponses },
         },
       },
       async (request, reply) => {
