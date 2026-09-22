@@ -15,8 +15,13 @@ serviço externo de informações climáticas.
 | | |
 |---|---|
 | **Aplicação** | https://ideas-hub-web.onrender.com |
-| **API** | https://ideas-hub-api.onrender.com |
-| **Contrato (Swagger UI)** | https://ideas-hub-api.onrender.com/docs |
+| **Contrato da API (Swagger UI)** | https://ideas-hub-api.onrender.com/docs |
+| **Saúde da API** | https://ideas-hub-api.onrender.com/health |
+
+A base da API é `https://ideas-hub-api.onrender.com`, e ela **não tem rota em `/`** —
+abrir o endereço puro no navegador devolve `404 ROUTE_NOT_FOUND`, que é o envelope de
+erro previsto na SPEC §6, e não um defeito. Os endpoints estão em `/users`, `/users/:id`
+e `/weather/:city`; o Swagger UI acima permite executá-los pelo navegador.
 
 > **O primeiro acesso demora.** O plano gratuito do Render hiberna o serviço após
 > inatividade, e a instância leva cerca de 50 segundos para responder de novo. Não é
