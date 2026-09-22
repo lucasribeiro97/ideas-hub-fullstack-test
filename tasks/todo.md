@@ -388,7 +388,7 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Nota:** primeiro item da ordem de corte do plano §5.
 
 ### TASK-DEPLOY-01 — Pacote de produção autossuficiente
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Motivação:** `npm run build` gera um `dist/` que **não consegue aplicar migrations**.
   O `tsc` compila `.ts` e não copia os `.sql` nem o `meta/_journal.json`, então
   `node dist/db/migrate.js` falha com `Can't find meta/_journal.json file`. Invisível
@@ -398,12 +398,13 @@ requisito atualiza a SPEC ou o plano primeiro.
   1. `node dist/db/migrate.js` aplica as migrations num banco vazio, sem `tsx` instalado.
   2. O `dist/` contém os arquivos de migration e o journal.
   3. O build falha se o `dist/` sair incompleto — o defeito não pode voltar em silêncio.
-- **Verificação:** build limpo, `npm ci --omit=dev`, migration aplicada contra banco
-  descartável, e a verificação provada reprovando com o `dist/` incompleto.
-- **Critérios:** S1, S15 · **Commit:** —
+- **Verificação:** build limpo a partir de clone novo; `node dist/db/migrate.js` aplicou
+  o schema num banco descartável (`pg_trgm`, 5 índices, 6 colunas); guarda provada
+  reprovando com o `dist/` incompleto, código de saída 1.
+- **Critérios:** S1, S15 · **Commit:** `592c633`
 
 ### TASK-DEPLOY-02 — Blueprint do Render versionado
-- **Estado:** ⬜
+- **Estado:** 🟡 preparado, aguardando publicação
 - **Aceite:**
   1. `render.yaml` na raiz descrevendo os três recursos: Postgres 16, a API como Web
      Service e o frontend como Static Site.
@@ -422,10 +423,13 @@ requisito atualiza a SPEC ou o plano primeiro.
   subconjunto importado da máquina local apontando `DATABASE_URL` para o banco
   hospedado. O banco atual, com 220.873 usuários, ocupa 179 MB — dos quais **120 MB são
   os índices GIN de trigrama** —, o que é apertado para o plano gratuito de 0,5 GB.
-- **Verificação:** aplicação acessível pela URL pública, com listagem, busca, CRUD e
-  clima funcionando; `/docs` respondendo; chave da WeatherAPI ausente de qualquer
-  resposta ao navegador.
-- **Critérios:** — · **Commit:** —
+- **Verificação:** os quatro comandos do blueprint foram ensaiados a partir de um clone
+  limpo, contra banco descartável e com as variáveis que a plataforma define: build da
+  API, migration, `npm start` respondendo `/health`, `/users` e `/docs` com log em JSON,
+  e build do frontend com a URL de produção embutida e `localhost` ausente. A chave da
+  WeatherAPI foi conferida ausente da resposta de `/weather/:city`.
+  **Falta a publicação em si**, que depende de conta na plataforma.
+- **Critérios:** — · **Commit:** `592c633`
 - **Nota:** diferencial opcional do enunciado ("deploy de demonstração"), que declara
   explicitamente não ser necessário publicar. O plano gratuito do Render hiberna o
   serviço após inatividade, então o primeiro acesso de quem avaliar será lento — o

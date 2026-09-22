@@ -22,6 +22,7 @@ serviço externo de informações climáticas.
 - [Decisões técnicas](#decisões-técnicas)
 - [Medições](#medições)
 - [Limitações conhecidas](#limitações-conhecidas)
+- [Deploy de demonstração](#deploy-de-demonstração)
 - [Com mais tempo](#com-mais-tempo)
 - [Documentação do processo](#documentação-do-processo)
 
@@ -502,6 +503,76 @@ cadeia de ferramentas suporta uma; é consequência esperada de manter os pacote
 independentes.
 
 **Sem autenticação**, conforme o enunciado determina.
+
+## Deploy de demonstração
+
+Diferencial opcional: o enunciado declara que **não é necessário publicar a aplicação**.
+O [`render.yaml`](./render.yaml) na raiz descreve os três recursos — Postgres 16, a API
+como Web Service e o frontend como Static Site — para que a publicação seja revisável
+como o resto do projeto, em vez de depender de cliques lembrados de memória.
+
+### A ordem importa, e não é arbitrária
+
+A API precisa da origem do frontend para o `CORS_ORIGIN`. O frontend precisa da URL da
+API em **tempo de build**, porque `VITE_API_URL` é embutida no pacote e não lida em
+execução. Uma das duas sempre existe antes da outra, então as duas variáveis ficam como
+preenchimento manual no painel e a ordem é esta:
+
+```
+1. Criar o Blueprint a partir do repositório
+   → o Render lê o render.yaml e cria os três recursos
+
+2. Preencher WEATHER_API_KEY no serviço ideas-hub-api
+   → é segredo; nunca entra em arquivo versionado
+
+3. Primeiro deploy do ideas-hub-web (falha ao chamar a API — esperado)
+   → o que importa é a URL que ele ganha
+
+4. CORS_ORIGIN no ideas-hub-api = URL do ideas-hub-web
+   VITE_API_URL no ideas-hub-web = URL do ideas-hub-api
+
+5. Redeploy dos dois
+```
+
+Sem o passo 5 o frontend continua com a URL antiga embutida: reconstruir é a única forma
+de trocar uma variável `VITE_*`.
+
+### Carga de dados
+
+O CSV de 935 MB não sobe para lugar nenhum. A demonstração é carregada da máquina local
+apontando para o banco hospedado:
+
+```bash
+cd apps/api
+DATABASE_URL="<connection string do Render>" npm run import -- --limit=50000
+```
+
+50 mil linhas produzem cerca de 22 mil usuários, o suficiente para exercitar busca,
+ordenação e paginação. **O volume completo não cabe no plano gratuito:** o banco local
+com 220.873 usuários ocupa 179 MB, dos quais **120 MB são os índices GIN de trigrama** —
+contra 0,5 GB de limite, é folga pequena demais para uma demonstração.
+
+### O que esperar do plano gratuito
+
+- **O serviço hiberna após inatividade.** O primeiro acesso de quem for avaliar leva
+  dezenas de segundos para responder. Não é defeito da aplicação, e sem este aviso é
+  lido como um.
+- **O Postgres gratuito do Render expira.** Um link de demonstração tem prazo de
+  validade; o repositório não.
+
+### O que foi verificado antes de publicar
+
+Os quatro comandos do blueprint foram ensaiados a partir de um clone limpo, contra um
+banco descartável, com as mesmas variáveis que a plataforma define:
+
+| Etapa | Resultado |
+|---|---|
+| `npm ci && npm run build` (API) | `dist/` com as 2 migrations e o journal |
+| `npm run db:migrate:dist` | schema aplicado: `pg_trgm`, 5 índices, 6 colunas |
+| `npm start` | `/health` 200, `/users` 200, `/docs` 200, log em JSON com `reqId` |
+| `npm ci && npm run build` (web) | URL de produção embutida, `localhost` ausente, React de produção |
+
+A chave da WeatherAPI foi conferida ausente da resposta de `/weather/:city`.
 
 ## Com mais tempo
 
