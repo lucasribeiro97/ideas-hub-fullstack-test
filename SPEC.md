@@ -25,6 +25,7 @@ Registradas conforme o enunciado pede em caso de ambiguidade.
 | P3 | "Tratar emails duplicados" não define qual registro vence | Vence a **primeira ocorrência no arquivo**. As duplicatas têm IDs e nomes diferentes entre si, então a escolha precisa ser determinística e documentada. |
 | P4 | Unicidade de email não especifica sensibilidade a caixa | Tratada como **case-insensitive**: `Contato@X.com` e `contato@x.com` são o mesmo usuário. |
 | P5 | "Variação de temperatura ao longo do dia" não define granularidade | Série **horária** do dia corrente, obtida em chamada única à WeatherAPI. |
+| P7 | A busca de cidade da WeatherAPI é aproximada | Verificado contra a API real: `"sao pualo"` devolve "Sao Sao, Chad" e `"12345"` devolve "Schenectady, USA" (interpretado como CEP). O `404` só ocorre quando nada casa. Como não há forma confiável de distinguir acerto de aproximação, a interface **sempre exibe a cidade, região e país resolvidos em destaque**, para que o erro de digitação seja visível a quem consultou. |
 | P6 | Volume esperado da importação não é definido | O padrão importa 500.000 linhas para que a avaliação seja rápida; `--limit=0` processa o arquivo completo. O tempo da carga completa é medido e documentado no README. |
 
 ## 3. Dataset de origem
@@ -205,6 +206,12 @@ caros; o limite mantém a latência previsível.
 | Timeout da origem | `504 WEATHER_TIMEOUT`, ou dado expirado com `stale: true` se houver cache |
 | Rate limit da origem | `429 WEATHER_RATE_LIMITED`, mesma regra de cache expirado |
 | Origem indisponível | `502 WEATHER_UPSTREAM_ERROR`, mesma regra de cache expirado |
+
+**Limitação conhecida da origem (P7):** a WeatherAPI faz correspondência
+aproximada de nome de cidade. Um erro de digitação raramente produz `404` —
+mais frequentemente devolve `200` com uma localidade diferente. Por isso a
+resposta inclui `city`, `region` e `country` resolvidos: são o único meio de
+quem consulta perceber que recebeu outra cidade.
 
 **Cache:** mapa em memória por cidade normalizada, TTL de 10 minutos. Em falha da
 origem, uma entrada expirada é servida com `stale: true` em vez de propagar o erro —

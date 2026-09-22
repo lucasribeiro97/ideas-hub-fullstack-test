@@ -180,19 +180,19 @@ requisito atualiza a SPEC ou o plano primeiro.
 > primeiro; nenhuma das duas sai do escopo.
 
 ### TASK-WEATHER-03 — Tratamento das falhas externas
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** mapeamento conforme §6: `404` cidade inexistente, `504` timeout, `429`
   rate limit, `502` indisponibilidade. A chave nunca aparece em resposta nem em log.
 - **Verificação:** testes com MSW para os quatro modos. **A API real não é chamada em
   teste algum.**
-- **Critérios:** S7, S8 · **Commit:** —
+- **Critérios:** S7, S8 · **Commit:** `82e54ad`
 
 ### TASK-WEATHER-04 — Rota `GET /weather/:city`
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** rota validando o parâmetro e compondo cliente, cache e tradução de erro.
 - **Verificação:** requisição real a uma cidade válida devolve o contrato completo com
   série horária não vazia.
-- **Critérios:** S7 · **Commit:** —
+- **Critérios:** S7 · **Commit:** `82e54ad`
 
 ---
 
@@ -320,7 +320,9 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Estado:** ⬜
 - **Aceite:** busca por cidade exibindo temperatura, umidade e condição atual. Cidade
   inexistente e falha do serviço produzem mensagens distintas. Dado servido de cache
-  expirado é sinalizado ao usuário.
+  expirado é sinalizado ao usuário. **A cidade, região e país resolvidos aparecem em
+  destaque** (premissa P7): a origem faz busca aproximada, e sem isso um erro de
+  digitação devolve outra cidade sem que ninguém perceba.
 - **Verificação:** testar cidade válida, cidade inventada e API indisponível.
 - **Critérios:** S13 · **Commit:** —
 
@@ -400,8 +402,8 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7`, `bcf8bf8` | 409 no POST e no PATCH, inclusive em caixa diferente |
 | S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f`, `761017d` | 22 testes na API; uso espontâneo do GIN só com volume, no M4 |
 | S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial), `b05d640` | provado nos cinco endpoints de usuários |
-| S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
-| S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial) | redact testado; falta M3 |
+| S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | `1cd6440`, `82e54ad` | 6 modos de falha provados em HTTP |
+| S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial), `82e54ad` | ausente de respostas, cabeçalhos e log real |
 | S9 Cache expira e protege | TASK-WEATHER-02 | `958a3ed` | TTL, expiração e stale-if-error testados |
 | S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | — | recarga preserva contexto |
