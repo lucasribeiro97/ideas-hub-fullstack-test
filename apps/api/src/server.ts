@@ -1,4 +1,5 @@
 import { buildApp } from './app.js'
+import { createDatabase } from './db/client.js'
 import { EnvValidationError, loadEnv } from './lib/env.js'
 
 /**
@@ -19,11 +20,13 @@ async function main(): Promise<void> {
     throw error
   }
 
-  const app = await buildApp(env)
+  const { db, pool } = createDatabase(env.DATABASE_URL)
+  const app = await buildApp(env, { db })
 
   const shutdown = async (signal: string): Promise<void> => {
     app.log.info({ signal }, 'encerrando')
     await app.close()
+    await pool.end()
     process.exit(0)
   }
 

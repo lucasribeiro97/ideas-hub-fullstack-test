@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { FastifyInstance } from 'fastify'
 import { buildApp } from '../src/app.js'
 import { loadEnv } from '../src/lib/env.js'
+import { connectTestDatabase } from './helpers/database.js'
 
 const env = loadEnv({
   NODE_ENV: 'test',
@@ -9,14 +10,17 @@ const env = loadEnv({
   WEATHER_API_KEY: 'chave-de-teste',
 })
 
+const { db, pool } = connectTestDatabase()
+
 let app: FastifyInstance
 
 beforeAll(async () => {
-  app = await buildApp(env)
+  app = await buildApp(env, { db })
 })
 
 afterAll(async () => {
   await app.close()
+  await pool.end()
 })
 
 describe('GET /health', () => {
