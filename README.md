@@ -605,8 +605,13 @@ Os quatro comandos foram ensaiados localmente antes de publicar, e mesmo assim:
    bloqueado por ser gerenciado pelo blueprint e mantém o valor do momento da criação;
    dois syncs não mudaram nada. É por isso que a correção acima precisa existir também
    como variável de ambiente, que continua editável.
-4. **Sem conectar o provedor Git, nada é automático.** Usando a URL do repositório
-   público, cada atualização exige sync manual do blueprint e deploy manual do serviço.
+4. **Sem conectar o provedor Git, nada é automático.** Criado a partir da URL do
+   repositório público, o blueprint não recebe aviso de push: cada atualização exigia
+   sync manual e deploy manual. **Resolvido depois**, instalando o app do Render no
+   GitHub com escopo restrito a este repositório — "Only select repositories", não a
+   conta inteira. A permissão concedida inclui escrita em actions, checks, deployments,
+   issues, pull requests, hooks e workflows, que é o escopo padrão do app; limitar o
+   repositório é o que mantém esse alcance contido.
 
 ### O que esperar do plano gratuito
 
