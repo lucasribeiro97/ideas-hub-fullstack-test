@@ -391,6 +391,98 @@ requisito atualiza a SPEC ou o plano primeiro.
 
 ## Rastreabilidade — critérios × tarefas
 
+## M9 — Revisão
+
+Marco acrescentado após o M8. **Estas tarefas foram registradas depois do trabalho que
+descrevem** — o enunciado pede o contrário, e a inversão está explicada no `AI_USAGE.md`.
+Os commits citados são os reais e antecedem este registro.
+
+### TASK-REV-01 — Auditoria do tráfego no navegador
+- **Estado:** ✅
+- **Aceite:** percorrer os fluxos da interface no Chrome comparando cada clique com o log
+  da API; nenhuma requisição supérflua, órfã ou repetida; os únicos erros devem ser os
+  legítimos do catálogo.
+- **Verificação:** 14 fluxos percorridos; 17 requisições no total; os dois erros são o
+  `409` de email duplicado e o `404` de cidade inexistente. Casos negativos conferidos:
+  cinco teclas digitadas geram uma requisição, voltar à página 1 não gera nenhuma.
+- **Critérios:** S11, S12 · **Commit:** `a224f54`
+
+### TASK-REV-02 — Pacote de produção com o React correto
+- **Estado:** ✅
+- **Aceite:** `npm run build` não pode publicar o React de desenvolvimento; a verificação
+  precisa ser automática e falhar com código 1.
+- **Verificação:** `bundleType` declarado pelo próprio React lido a cada build; guarda
+  provada reintroduzindo `NODE_ENV=development` no `.env`. Pacote de 920 KB para 672 KB.
+- **Critérios:** S22 · **Commit:** `8e7a242`
+
+### TASK-REV-03 — Agente revisor de código
+- **Estado:** ✅
+- **Aceite:** definição versionada, com ferramentas restritas à leitura e execução;
+  exigência de reprodução por achado; decisões já documentadas na SPEC declaradas para
+  não virarem ruído.
+- **Verificação:** rodado em seis frentes paralelas; 41 achados relatados, 37 distintos,
+  todos com reprodução. Quatro deles encontrados por duas frentes independentes.
+- **Critérios:** — · **Commit:** `87c9e4b`
+
+### TASK-REV-04 — Falha de conexão não derruba o processo
+- **Estado:** ✅
+- **Aceite:** erro em conexão ociosa do pool precisa chegar a um ouvinte, não virar
+  exceção não capturada; o pool deve continuar atendendo depois.
+- **Verificação:** conexão derrubada por `pg_terminate_backend`; sem o ouvinte o processo
+  morria. Três casos, um deles afirmando sobre a fábrica e não sobre o teste.
+- **Critérios:** S17 · **Commit:** `badc88c`
+
+### TASK-REV-05 — Nenhuma requisição pede trabalho ilimitado
+- **Estado:** ✅
+- **Aceite:** `page` com teto no contrato publicado; tempo limite de consulta na conexão
+  da API, sem afetar a importação.
+- **Verificação:** `page=9007199254740991` passava e agora é `400`; teto presente no
+  OpenAPI; `SHOW statement_timeout` na conexão da API e `0` na da importação.
+- **Critérios:** S18 · **Commit:** `badc88c`
+
+### TASK-REV-06 — Linha defeituosa não derruba a importação
+- **Estado:** ✅
+- **Aceite:** caractere de controle rejeitado com motivo na validação, antes do `COPY`;
+  mesma regra aplicada à API, devolvendo `400`/`422` em vez de `500`.
+- **Verificação:** byte NUL rejeitado com número de linha e trecho; as demais linhas
+  gravadas; contagens fechando. Acentuação, ideogramas e emoji continuam aceitos.
+- **Critérios:** S3, S19 · **Commit:** `badc88c`
+
+### TASK-REV-07 — Importações simultâneas não se corrompem
+- **Estado:** ✅
+- **Aceite:** a segunda execução é recusada com erro reconhecível; o lock é devolvido
+  inclusive quando a importação falha.
+- **Verificação:** duas execuções concorrentes, uma conclui e a outra é recusada. Sem o
+  lock, o erro era `relation "users_import_staging" does not exist`. Lock consultivo, que
+  o Postgres libera sozinho quando a conexão cai.
+- **Critérios:** S2, S20 · **Commit:** `badc88c`
+
+### TASK-REV-08 — Cota da origem climática distinguível de indisponibilidade
+- **Estado:** ✅
+- **Aceite:** classificar pelo código do corpo, não pelo status; alinhar os simuladores
+  de teste aos status que a origem realmente usa.
+- **Verificação:** `403` com `code: 2007` vira `429`; `2008` e `2009` continuam `502`.
+  Com o simulador corrigido e o código antigo: `expected 502 to be 429`.
+- **Critérios:** S7 · **Commit:** `badc88c`
+
+### TASK-REV-09 — Exceção de render não apaga a aplicação
+- **Estado:** ✅
+- **Aceite:** limite de erro em volta do conteúdo da rota, preservando a navegação; erro
+  registrado, não engolido; trocar de tela limpa o estado de falha.
+- **Verificação:** data inválida vinda da API; sem o limite, 5 dos 6 casos reprovam e o
+  corpo da página fica vazio.
+- **Critérios:** S13, S21 · **Commit:** `badc88c`
+
+### TASK-REV-10 — A suíte do frontend exercita o que diz exercitar
+- **Estado:** ✅
+- **Aceite:** nenhum teste pode falar com a API real; as rotas com identificador precisam
+  afirmar sobre a tela de destino, não sobre a de carregamento; o gráfico precisa ser
+  exercitado.
+- **Verificação:** `apiServer.listen` instalado onde a aplicação inteira é montada; as
+  duas rotas passam a esperar pelo dado carregado; medição do contêiner fornecida ao
+  jsdom. Remover o gráfico reprovava 0 casos e agora reprova 6.
+- **Critérios:** S5, S13 · **Commit:** `badc88c`
+
 Os commits são preenchidos conforme cada tarefa é concluída.
 
 | Critério | Tarefas | Commit | Verificação |
@@ -409,5 +501,11 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem, formulário e detalhe cobertos |
 | S14 Utilizável por teclado | TASK-WEB-08 | `6d23891` | axe sem violações em 7 telas + fluxos por teclado |
-| S15 Executável pelo README | TASK-DOC-02 | `f1b1065` | clone novo em diretório limpo: 553 testes passam |
+| S15 Executável pelo README | TASK-DOC-02 | `f1b1065` | clone novo em diretório limpo: 553 testes passam (606 após o M9) |
 | S16 Cobertura ≥ 90% no domínio | TASK-INFRA-06, TASK-IMPORT-05 | `6449c27`, `a0bc095` | gate ativo em modules/** e scripts/** |
+| S17 Conexão perdida não derruba o processo | TASK-REV-04 | `badc88c` | `pg_terminate_backend` na conexão ociosa; API continua atendendo |
+| S18 Requisição não pede trabalho ilimitado | TASK-REV-05 | `badc88c` | teto de `page` no OpenAPI + tempo limite na conexão |
+| S19 Linha defeituosa não derruba a importação | TASK-REV-06 | `badc88c` | NUL rejeitado com motivo; demais linhas gravadas |
+| S20 Importações simultâneas não se corrompem | TASK-REV-07 | `badc88c` | segunda execução recusada com erro reconhecível |
+| S21 Exceção de render não apaga a aplicação | TASK-REV-09 | `badc88c` | data inválida: alerta exibido, navegação preservada |
+| S22 Pacote de produção com o React correto | TASK-REV-02 | `8e7a242` | `bundleType` verificado a cada build |

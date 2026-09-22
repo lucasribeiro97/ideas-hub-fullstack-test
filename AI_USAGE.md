@@ -29,6 +29,8 @@ ferramenta.
 | `dataviz` / embutida no Claude Code | Procedimento para construir visualizações: escolha da forma, papel da cor, validação de paleta, especificação de marcas, camada de interação e acessibilidade | Carregada antes de escrever o gráfico de temperatura, conforme a própria skill determina. O valor concreto foi transformar "escolher uma cor bonita" em verificação executável | Implement (TASK-WEB-11) | `TemperatureChart.tsx`, tokens de gráfico no `index.css` | **Aceita, com um ajuste.** Segui a paleta de referência e as regras de marca. O intervalo do eixo Y foi ajustado depois de olhar o resultado — o padrão do Recharts começava em zero e espremia a variação | O script `validate_palette.js` da skill foi executado contra **as nossas superfícies**, não as do exemplo: aprovado em faixa de luminosidade, piso de croma e contraste nos modos claro e escuro |
 | `claude-in-chrome` / embutida no Claude Code | Automação do navegador para abrir a aplicação, capturar telas e inspecionar o DOM | Necessária para cumprir o último passo da skill de visualização — "renderize e olhe" — e para verificar acessibilidade e responsividade em navegador real | Implement, Review | Verificação das telas de usuários e clima, e do Swagger UI | **Aceita, com limitação registrada.** O redimensionamento de janela não altera a viewport neste ambiente; após três tentativas, troquei a abordagem | A verificação de tela estreita passou a medir o comportamento real: com o contêiner reduzido a 358px, a tabela de 735px rolou dentro dele e a página não ganhou rolagem horizontal |
 
+| `revisor-codigo` / **definição própria**, versionada em `.claude/agents/revisor-codigo.md` | Revisão adversarial profunda do código pronto: defeitos que quebram em produção, brechas de segurança, condições de corrida, contratos divergentes e armadilhas de desempenho | Escrita depois do escopo obrigatório fechado, quando o uso manual revelou defeitos que a suíte inteira não via. Um contexto separado lê o que está escrito, não o que se quis escrever | Review | `db/client.ts`, `users.schemas.ts`, `weather.client.ts`, `import/lock.ts`, `import/parse.ts`, `ErrorBoundary.tsx`, `tests/setup.ts`, e sete arquivos de teste novos | **Aceitos sete achados de maior severidade, seis registrados como limitação, um corrigido na leitura.** O relatório da importação inflou a probabilidade de um cenário; o defeito era real, a probabilidade não | Cada correção só entrou depois de reverter o código e confirmar que a suíte reprova. Os achados estruturais foram reverificados por mim antes de virar trabalho |
+
 **Não instalei skills adicionais para cumprir o requisito.** O enunciado diz que a
 quantidade não pontua e que usar muitas sem necessidade indica falta de foco. As duas
 usadas foram carregadas porque a tarefa em mãos as pedia.
@@ -54,6 +56,23 @@ Recursos equivalentes também utilizados, nativos da ferramenta:
 | Implement | Escrita de código e testes, tarefa a tarefa |
 | Review | Verificação em navegador, medições, testes de instalação do zero, e varredura adversarial por subagente revisor |
 | Documentação | README, OpenAPI e este registro |
+
+---
+
+## Resumo por fase
+
+O enunciado recomenda uma tabela neste formato; as seções seguintes detalham cada linha.
+
+| Fase | Objetivo | Como a IA foi orientada | Decisão tomada | Artefato alterado | Como foi verificado |
+|---|---|---|---|---|---|
+| Specify | Transformar o enunciado em critérios verificáveis | Decisões de fundo dadas por mim antes de qualquer redação: stack, estrutura, desempate de duplicatas, unicidade sem caixa | **Alterei o rascunho**: a IA reproduziu "não há meta de cobertura" do enunciado sem avaliar o trade-off; exigi 90% e aceitei o meio-termo argumentado por ela | `SPEC.md`, `CAPABILITY_MAP.md` | 16 critérios de sucesso escritos de forma verificável, cada um com a evidência que o fecharia |
+| Specify | Inspecionar o dataset antes de modelar | Pedi para visualizar o conteúdo real do arquivo, não para supor o formato | **Aceita**: a inspeção revelou que o arquivo é tar gzipado e que 84% dos emails se repetem | `SPEC.md` §3 | Contagens extraídas do arquivo real, não estimadas |
+| Plan | Marcos, riscos e ordem de implementação | Pedi ordem que falhasse cedo no que é caro de refazer | **Aceita**: clima antes da importação, por concentrar a dependência externa; importação depois do schema estável | `tasks/plan.md` | Risco R3 registrou antecipadamente que não migraríamos para keyset; medido depois em 64 ms, não se materializou |
+| Tasks | Decompor em unidades com aceite | A IA ofereceu três granularidades; escolhi a média | **Escolha minha**, com o argumento dela pesando: um `todo.md` fino demais fica desatualizado, e o enunciado pede "estado atual" | `tasks/todo.md` | 43 tarefas, cada uma com forma de verificação antes de existir código |
+| Tasks | Corrigir ordem inviável | Notei que provar os status do clima exige a rota existir | **Alterada antes do código**: clima 03 e 04 invertidas | `tasks/todo.md` | Inversão em commit próprio (`94b118e`), anterior à implementação |
+| Implement | Uma tarefa por vez, verificada antes de avançar | Contexto e critério de aceite explícitos a cada tarefa | **Seis rejeições pelo gate de cobertura**, todas apontando código sobrando, não teste faltando | Código e testes | `typecheck`, `lint`, suíte, e execução real contra banco, API ou navegador |
+| Implement | Corrigir índice que não funcionava | Pedi `EXPLAIN ANALYZE` **depois** de aplicar, não antes | **Corrigida pela própria IA após medir**: `.desc()` do Drizzle emitia `DESC NULLS LAST` e o planejador ignorava o índice | `db/schema.ts`, `SPEC.md` §7 | 29 ms para 0,33 ms, medido no banco com 220.875 registros |
+| Review | Encontrar o que a suíte não vê | Agente próprio, sem permissão de edição, com reprodução obrigatória por achado | **Sete corrigidos, seis documentados, um contestado**: a probabilidade inflada no relatório da importação | `SPEC.md` §6–§9, `tasks/plan.md` M9, `tasks/todo.md` M9, código e testes | Cada correção revertida para confirmar que a suíte reprova |
 
 ---
 
@@ -529,6 +548,33 @@ comando; a probabilidade é que estava inflada no texto.
 verdade.** Ao reverter o lock, apenas o caso que exige uma recusa reconhecível reprova —
 os outros três guardam o ciclo de vida do lock. A corrida depende de temporização, que é
 justamente o que a torna perigosa e o que impede um teste determinístico simples.
+
+### Onde eu descumpri o próprio fluxo, e o que isso custou
+
+O enunciado é explícito: *"Se descobrir uma mudança necessária durante a implementação,
+atualize primeiro a especificação ou o plano e registre a decisão."* No M9 eu não fiz
+isso. As correções da revisão foram implementadas e só depois a SPEC, o plano e o
+`todo.md` foram atualizados — o marco M9 e as dez tarefas `TASK-REV-*` estão registrados
+**depois** do trabalho que descrevem, e os commits provam a ordem.
+
+Não reescrevi o histórico para disfarçar. O registro retroativo tem menos valor que o
+antecipado, e apagar a diferença tiraria de mim a única coisa que ainda se aproveita do
+erro: saber onde ele acontece. E ele aconteceu num padrão reconhecível — o fluxo se
+manteve enquanto o trabalho vinha de tarefas planejadas, e cedeu quando passou a vir de
+defeito encontrado. Achado de revisão chega com a correção quase óbvia, e a urgência de
+corrigir compete com a disciplina de registrar antes.
+
+O custo concreto foi visível na auditoria deste documento: a SPEC §7 continuou
+apresentando a tabela de índices como completa depois que a revisão mostrou que
+`sort=name` e `sort=email` não têm nenhum, e a §6 continuou declarando `page` sem teto
+depois de o teto existir no código. Por algumas horas, a especificação descrevia um
+sistema que não era mais o implementado — que é exatamente o que o fluxo existe para
+impedir.
+
+**O que faria diferente:** tratar cada achado de revisão como entrada no `todo.md` antes
+de abrir o editor, do mesmo jeito que tratei cada tarefa planejada. A regra não é mais
+difícil de seguir nessa fase; ela só parece dispensável porque o defeito já está
+diagnosticado.
 
 ### Limitação do mecanismo
 

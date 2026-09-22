@@ -170,7 +170,7 @@ pelo `x-request-id` devolvido no cabeçalho.
 | Parâmetro | Regra |
 |---|---|
 | `search` | busca parcial e sem distinção de caixa em `name` **ou** `email` |
-| `page` | inteiro ≥ 1, padrão `1` |
+| `page` | inteiro entre 1 e 200.000, padrão `1` |
 | `perPage` | inteiro entre 1 e 100, padrão `20` |
 | `sort` | `name`, `email` ou `createdAt`, padrão `createdAt` |
 | `order` | `asc` ou `desc`, padrão `desc` |
@@ -187,6 +187,26 @@ Resposta:
 
 `perPage` é limitado a 100 porque `OFFSET` profundo e `COUNT` sobre 1,6M de linhas são
 caros; o limite mantém a latência previsível.
+
+**`page` também tem teto, e pelo mesmo motivo.** Limitar só `perPage` não limitava o
+`OFFSET`, que é o que custa: um `OFFSET` gigante impede a ordenação limitada ao topo e
+obriga o banco a ordenar o conjunto inteiro. Medido com 220.874 registros e `sort=name`:
+330 ms e 22 MB de arquivo temporário por requisição, e 200 chamadas simultâneas levaram
+uma listagem comum de 12 ms para 9,3 s, porque as conexões do pool ficavam todas
+ocupadas — tudo respondendo `200`, portanto invisível a alarme de erro. O teto de 200.000
+cobre com folga a base projetada (1.598.726 usuários dá 159.873 páginas no menor
+`perPage` da interface) e recusa o pedido absurdo antes de tocar no banco. A segunda
+defesa é `DB_STATEMENT_TIMEOUT_MS` (§9), que vale para qualquer consulta, inclusive as
+que ninguém previu.
+
+**Todo texto vindo de fora rejeita caracteres de controle.** Vale para `name`, `email`,
+`phone` e `search`, e também para cada campo do CSV na importação. O byte NUL é o motivo:
+ele não é espaço em branco, então atravessava o `trim()` e o validador de email, chegava
+ao Postgres como parâmetro e era recusado com SQLSTATE 22021 — um erro fora de todos os
+casos tratados, que virava `500 INTERNAL_ERROR` e uma linha de log com pilha, por entrada
+que qualquer cliente consegue enviar. Agora é `400` ou `422` do catálogo. Acentuação,
+ideogramas e emoji continuam aceitos: a regra mira o que quebra o banco, não o que foge
+do ASCII.
 
 ### Clima
 
@@ -209,6 +229,13 @@ caros; o limite mantém a latência previsível.
 | Timeout da origem | `504 WEATHER_TIMEOUT`, ou dado expirado com `stale: true` se houver cache |
 | Rate limit da origem | `429 WEATHER_RATE_LIMITED`, mesma regra de cache expirado |
 | Origem indisponível | `502 WEATHER_UPSTREAM_ERROR`, mesma regra de cache expirado |
+
+A classificação é feita pelo **código do corpo**, não pelo status HTTP. A WeatherAPI não
+usa `429`: a tabela oficial mapeia cota esgotada para **HTTP 403 com `code: 2007`**, o
+mesmo status de "chave desabilitada" (`2008`), que para nós é erro de configuração e vira
+`502`. Ler só o status confundia o modo de falha mais provável deste projeto — a chave
+gratuita atingindo o limite — com indisponibilidade da origem. O `429` continua tratado
+por ser o status convencional, caso a origem passe a usá-lo.
 
 **Limitação conhecida da origem (P7):** a WeatherAPI faz correspondência
 aproximada de nome de cidade. Um erro de digitação raramente produz `404` —
@@ -259,6 +286,21 @@ varredura reversa do índice produz `id` em ordem contrária à pedida. Cobrir a
 direções exigiria um segundo índice, o que não se justifica: o padrão da listagem é
 decrescente. Limitação registrada em vez de otimizada especulativamente.
 
+**`sort=name` e `sort=email` não têm índice.** Os dois são aceitos pelo contrato e
+expostos como colunas clicáveis, e nenhum é coberto pela tabela acima — esta seção
+apresentava a lista de índices como completa, e não era. Medido com 220.874 registros:
+
+| Consulta | Com índice (`createdAt`) | Sem índice (`name`) |
+|---|---:|---:|
+| Primeira página | 0,43 ms (`Index Scan`) | 57,9 ms (`Parallel Seq Scan` + `Sort`) |
+| Página 11.043 | 76 ms | 296 ms |
+
+Criar `(name, id)` e `(email, id)` resolveria, ao custo de escrita e espaço na carga de
+10 milhões de linhas — decisão que exige medir a carga completa, o que não foi feito.
+Enquanto isso, o pior caso é limitado pelo teto de `page` e pelo tempo limite de consulta
+(§6 e §9). Lacuna encontrada em revisão adversarial, registrada em vez de corrigida às
+pressas.
+
 ## 8. Estratégia de testes
 
 | Camada | Ferramenta | Escopo |
@@ -272,6 +314,24 @@ decrescente. Limitação registrada em vez de otimizada especulativamente.
 Os cenários obrigatórios do enunciado são testados contra **Postgres real**, não contra
 mocks: rejeição de email duplicado é comportamento de constraint, e simulá-la testaria
 apenas o simulador.
+
+### Duas regras que a revisão acrescentou
+
+**O que a tela pede, e não só o que ela mostra.** `apps/web/tests/requestTraffic.test.tsx`
+afirma sobre a sequência de requisições. É o único lugar da suíte onde uma requisição a
+mais é defeito, e existe porque três defeitos reais passaram pela suíte inteira: a tela
+terminava correta nos três, e o problema estava no meio do caminho.
+
+**Um teste que nunca viu o defeito não prova que o pega.** Antes de aceitar um caso novo
+de regressão, a correção é revertida e a suíte precisa reprovar. Aplicado a cada uma das
+sete correções da revisão. A mesma técnica, aplicada ao contrário, expôs o buraco mais
+caro: remover o gráfico de temperatura por completo mantinha os 231 testes verdes, porque
+em jsdom o `ResponsiveContainer` media zero e o Recharts não emitia elemento algum.
+
+**O simulador não pode definir a realidade que ele mesmo confere.** O mock de cota
+esgotada da WeatherAPI devolvia `429`, status que a origem não usa em lugar nenhum. O
+teste passava verificando a própria invenção. Mock de serviço externo agora se justifica
+contra a documentação da origem, e a justificativa fica escrita no helper.
 
 ### Cobertura
 
@@ -318,10 +378,18 @@ inválido, em vez de quebrar na primeira requisição.
 | `WEATHER_API_KEY` | api | Chave da WeatherAPI. **Nunca versionada nem enviada ao navegador** |
 | `WEATHER_CACHE_TTL_SECONDS` | api | TTL do cache, padrão 600 |
 | `WEATHER_TIMEOUT_MS` | api | Timeout da chamada externa, padrão 5000 |
+| `DB_STATEMENT_TIMEOUT_MS` | api | Tempo máximo de uma consulta, padrão 10000. **Não se aplica à importação**: o merge dela leva dezenas de minutos e herdar o limite o mataria no meio |
 | `VITE_API_URL` | web | URL base da API |
 
 `.env.example` versionado com as chaves e sem valores reais. `.env` está no `.gitignore`
 desde o commit inicial, de modo que não existe ponto no histórico em que a chave vaze.
+
+**`NODE_ENV` não entra no `.env` compartilhado.** O mesmo arquivo é lido pela API, via
+`node --env-file`, e pelo Vite, via `envDir` — e o Vite respeita um `NODE_ENV` vindo de
+arquivo `.env`. Um valor escrito para a API fazia o `npm run build` do frontend publicar o
+React de desenvolvimento. A variável pertence ao processo; a API assume `development` na
+ausência dela, e `npm run build` verifica o `bundleType` declarado pelo próprio React e
+falha se o pacote sair errado.
 
 ## 10. Comandos
 
@@ -393,6 +461,12 @@ Verificáveis, um a um.
 | S14 | Utilizável por teclado | Navegação e submissão de formulário sem mouse |
 | S15 | Executável a partir do README | Setup limpo seguindo apenas o documento |
 | S16 | Cobertura de 90% na regra de negócio | `npm run test:coverage` falha se `modules/**` ou o script de importação ficarem abaixo de 90% de linhas e branches |
+| S17 | Falha de conexão não derruba o processo | Conexão ociosa derrubada por `pg_terminate_backend`: o erro chega ao ouvinte do pool e a API continua atendendo |
+| S18 | Nenhuma requisição pede trabalho ilimitado | Teto de `page` no contrato publicado e tempo limite de consulta verificado na conexão da API |
+| S19 | Uma linha defeituosa não derruba a importação | Byte NUL rejeitado com motivo e número de linha; as demais linhas são gravadas e as contagens fecham |
+| S20 | Duas importações simultâneas não se corrompem | A segunda é recusada com erro reconhecível, e o lock é devolvido inclusive quando a importação falha |
+| S21 | Exceção de render não apaga a aplicação | Data inválida vinda da API: alerta exibido, navegação preservada, erro registrado no console |
+| S22 | O pacote de produção não traz o React de desenvolvimento | `npm run build` lê o `bundleType` declarado pelo React e falha se o pacote sair errado |
 
 ## 14. Questões em aberto
 

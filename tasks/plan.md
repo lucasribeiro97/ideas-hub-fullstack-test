@@ -220,6 +220,30 @@ ficou de fora e como seria concluído** — o enunciado avalia a comunicação d
 paginação, integração climática com tratamento de falha, importação reproduzível, os
 quatro cenários de teste exigidos e o README executável.
 
+## M9 — Revisão (acrescentado após o M8)
+
+Marco criado depois de o escopo obrigatório estar fechado, quando o uso manual da
+aplicação revelou defeitos que a suíte inteira não via. Ele não estava no plano original,
+e é o primeiro deste projeto registrado **depois** do trabalho que descreve — a razão e a
+consequência dessa inversão estão no `AI_USAGE.md`.
+
+**Escopo.** Auditoria do tráfego no navegador; varredura adversarial do código por um
+agente revisor próprio, em seis frentes paralelas; correção dos achados de maior
+severidade; registro dos demais com custo medido.
+
+**Checkpoint.** Cada correção só é aceita depois de reverter o código e confirmar que a
+suíte reprova. Nenhuma correção entra sem esse passo.
+
+**Risco novo (R9): o revisor produz achado plausível e falso.** Mitigação: cada achado
+exige comando executado ou caminho de código rastreado com arquivo e linha; sem isso é
+marcado como não verificado. Materializou-se de forma branda — um achado teve a
+probabilidade inflada no texto e foi corrigido na leitura, não no código.
+
+**Risco novo (R10): o revisor altera o ambiente que está auditando.** Materializou-se: um
+revisor apagou um registro real do banco de desenvolvimento ao testar o `DELETE` de um id
+que presumiu inexistente. Mitigação aplicada depois do fato: escrita apenas em banco
+descartável, registrada na definição do agente.
+
 ## 6. Rastreabilidade
 
 A tabela requisito → tarefa → commit → verificação é mantida em
