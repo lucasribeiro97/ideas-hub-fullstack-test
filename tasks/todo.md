@@ -265,12 +265,12 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S11 · **Commit:** `8c3d710`
 
 ### TASK-WEB-04 — Debounce e cancelamento de requisições obsoletas
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** digitar não dispara uma requisição por tecla; respostas de buscas
   superadas não sobrescrevem o resultado atual.
 - **Verificação:** digitar rapidamente e observar na aba de rede que as requisições
   intermediárias foram canceladas e a última vence.
-- **Critérios:** S12 · **Commit:** —
+- **Critérios:** S12 · **Commit:** `6266f2f`
 
 ### TASK-WEB-05 — Estados de carregamento, vazio e erro
 - **Estado:** ⬜
@@ -406,7 +406,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S9 Cache expira e protege | TASK-WEATHER-02 | `958a3ed` | TTL, expiração e stale-if-error testados |
 | S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
 | S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710` (parcial) | ida e volta pela URL testada; falta detalhe |
-| S12 Busca sem disparo por tecla | TASK-WEB-04 | — | inspeção da aba de rede |
+| S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | — | provocação manual |
 | S14 Utilizável por teclado | TASK-WEB-08 | — | percurso sem mouse |
 | S15 Executável pelo README | TASK-DOC-02 | — | setup em diretório limpo |
