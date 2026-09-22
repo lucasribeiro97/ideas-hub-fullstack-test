@@ -287,13 +287,13 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S13 · **Commit:** `8674d6c`
 
 ### TASK-WEB-07 — Tela de detalhe com editar e excluir
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** exibe todos os campos incluindo `phone`; excluir pede confirmação em
   elemento da própria interface — **não** `window.confirm` — e redireciona para a
   listagem preservando os filtros anteriores.
 - **Verificação:** excluir a partir de uma listagem filtrada retorna à mesma listagem
   filtrada.
-- **Critérios:** S11, S13 · **Commit:** —
+- **Critérios:** S11, S13 · **Commit:** `dd855d5`
 
 ### TASK-WEB-08 — Acessibilidade e responsividade
 - **Estado:** ⬜
@@ -405,7 +405,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S8 Chave não vaza | TASK-INFRA-03, TASK-INFRA-04, TASK-INFRA-07, TASK-WEATHER-03 | `6449c27` (parcial), `82e54ad` | ausente de respostas, cabeçalhos e log real |
 | S9 Cache expira e protege | TASK-WEATHER-02 | `958a3ed` | TTL, expiração e stale-if-error testados |
 | S10 Contrato documentado | TASK-DOC-01 | — | Swagger responde |
-| S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710` (parcial) | ida e volta pela URL testada; falta detalhe |
+| S11 Filtros na URL | TASK-WEB-02, TASK-WEB-03, TASK-WEB-07 | `8c3d710`, `dd855d5` | ida e volta pela URL e retorno da exclusão |
 | S12 Busca sem disparo por tecla | TASK-WEB-04 | `6266f2f` | abort verificado no sinal do servidor simulado |
 | S13 Carregando, vazio, erro | TASK-WEB-05, TASK-WEB-06, TASK-WEB-10 | `2a454d1` (parcial) | listagem coberta; faltam formulário e clima |
 | S14 Utilizável por teclado | TASK-WEB-08 | — | percurso sem mouse |
