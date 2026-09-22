@@ -280,11 +280,11 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S13 · **Commit:** `2a454d1`
 
 ### TASK-WEB-06 — Formulário de cadastro e edição
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** validação no cliente antes do envio; erro `409` do servidor exibido no
   campo de email, não como mensagem genérica; envio bloqueado durante a requisição.
 - **Verificação:** tentar cadastrar email existente mostra a mensagem no campo correto.
-- **Critérios:** S13 · **Commit:** —
+- **Critérios:** S13 · **Commit:** `8674d6c`
 
 ### TASK-WEB-07 — Tela de detalhe com editar e excluir
 - **Estado:** ⬜
