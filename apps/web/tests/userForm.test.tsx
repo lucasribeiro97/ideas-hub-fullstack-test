@@ -183,7 +183,18 @@ describe('cadastro', () => {
     await user.type(screen.getByLabelText(/email/i), 'ana@exemplo.com')
     await user.click(screen.getByRole('button', { name: /cadastrar/i }))
 
-    expect(await screen.findByRole('heading', { name: /detalhes do usuário/i })).toBeInTheDocument()
+    /*
+     * O título esperado é o nome do usuário, que a tela de detalhe só mostra
+     * depois de ter o registro.
+     *
+     * Antes, este caso esperava por "Detalhes do usuário" — que é o título das
+     * telas de carregando e de erro. Ele passava vendo a tela de espera e
+     * teria continuado passando se a busca do registro falhasse logo em
+     * seguida. A troca só apareceu quando a resposta do cadastro passou a
+     * semear o cache: sem carregamento, não havia mais tela de espera para
+     * encontrar.
+     */
+    expect(await screen.findByRole('heading', { name: 'Ana Souza' })).toBeInTheDocument()
   })
 })
 

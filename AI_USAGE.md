@@ -237,6 +237,7 @@ Nenhuma implementação foi aceita por parecer correta.
 | **Navegador real** | Telas, acessibilidade, gráfico e Swagger UI |
 | **Instalação do zero em diretório limpo** | Encontrou dois bugs invisíveis no repositório de trabalho |
 | **axe-core** | Zero violações de acessibilidade em oito telas |
+| **Auditoria do tráfego no navegador** | O que cada tela pede à API, contado no log do servidor — encontrou três defeitos que a suíte não via |
 
 ### Três achados que só a verificação produziu
 
@@ -252,6 +253,49 @@ ao instalar o projeto do zero seguindo apenas o README.
 **Cancelamento de requisição que não funcionava.** A detecção usava
 `instanceof DOMException`, e o tipo concreto do erro de abort varia entre ambientes. O
 cancelamento virava erro visível na tela — o oposto do requisito.
+
+### O limite mais caro que encontrei: verificar o resultado não é verificar o caminho
+
+Os três defeitos abaixo escaparam de 553 testes. Nenhum foi sorte: os três têm a mesma
+causa, e a causa é minha.
+
+**CORS bloqueando `PATCH` e `DELETE`.** O padrão do `@fastify/cors` libera apenas `GET`,
+`HEAD` e `POST` — os "métodos simples" da especificação —, e o navegador barrava os
+outros na verificação prévia, antes de a requisição sair. Encontrado por quem usou a
+tela, não pela suíte: `app.inject()` entrega a requisição direto ao roteador e não
+simula navegador nenhum. Corrigido declarando os métodos, e coberto por sete casos que
+exercitam o `OPTIONS` de propósito (`tests/cors.test.ts`).
+
+**Requisição órfã na exclusão.** Ao excluir, a tela de detalhe buscava o registro que
+acabara de apagar e recebia `404`. Também encontrado no uso manual. Os testes existentes
+não tinham como pegar: eles afirmavam que o usuário sumia da lista e que a navegação
+acontecia — e as duas coisas aconteciam, com a requisição perdida no meio.
+
+**Duas buscas para obter o dado que a resposta já trazia.** Ao salvar uma edição, eu
+invalidava o cache do registro. Isso fazia a tela de edição buscar de novo e a de
+detalhe buscar outra vez, enquanto a resposta do `PATCH` já continha exatamente o
+registro gravado. Encontrado contando as requisições no log da API, fluxo a fluxo.
+Corrigido escrevendo a resposta no cache (`setQueryData`) em vez de invalidá-lo.
+
+A auditoria que fechou o assunto percorreu **14 fluxos no Chrome** — listagem, busca
+digitada tecla a tecla, ordenação, paginação, cadastro válido e inválido, email
+duplicado com caixa trocada, edição, exclusão e as quatro variações do clima —
+comparando cada clique com o log do servidor. Resultado final: **17 requisições, e os
+dois erros são os dois esperados** (`409` de email duplicado, `404` de cidade
+inexistente). Confirmou também o que não devia acontecer: cinco teclas digitadas geram
+uma requisição, voltar para a página 1 não gera nenhuma, e digitar uma cidade sem
+enviar não consulta nada.
+
+O que mudou na suíte: `tests/requestTraffic.test.tsx` passou a afirmar sobre o tráfego,
+e não sobre a tela. É o único lugar onde uma requisição a mais é um defeito. Antes de
+aceitar os quatro casos, reverti as duas correções e **confirmei que os quatro falham** —
+um teste que nunca viu o defeito não prova que o pega.
+
+O efeito colateral mais interessante foi um teste antigo cair: `leva ao detalhe do
+usuário criado` esperava pelo título "Detalhes do usuário", que é o título das telas de
+**carregando e de erro**. Ele afirmava ter chegado ao destino olhando para a tela de
+espera, e teria continuado passando se a busca seguinte falhasse. Sem carregamento, não
+havia mais tela de espera para encontrar. A asserção agora é o nome do usuário.
 
 ---
 

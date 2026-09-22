@@ -47,10 +47,21 @@ export function UserFormPage({ mode }: UserFormPageProps) {
       return isEdit ? updateUser(id as string, payload) : createUser(payload)
     },
     onSuccess: (user) => {
-      // A listagem e o detalhe passam a estar desatualizados; invalidar faz a
-      // próxima visita buscar o dado novo em vez de mostrar o antigo.
+      /*
+       * A resposta já traz o registro gravado, então ela é escrita direto no
+       * cache em vez de invalidá-lo.
+       *
+       * Invalidar fazia o contrário do pretendido: a consulta desta tela
+       * reagia buscando de novo, e a tela de detalhe buscava outra vez ao
+       * montar — duas requisições para obter o dado que o servidor acabou de
+       * devolver. Medido no log da API: um PATCH seguido de dois GET idênticos.
+       *
+       * A listagem continua sendo invalidada, e não semeada: ela depende de
+       * filtro, ordenação e página, e o registro alterado pode nem pertencer
+       * ao recorte visível.
+       */
+      queryClient.setQueryData(['user', user.id], user)
       void queryClient.invalidateQueries({ queryKey: ['users'] })
-      void queryClient.invalidateQueries({ queryKey: ['user', user.id] })
       void navigate(`/users/${user.id}`, { replace: true })
     },
   })
