@@ -3,12 +3,19 @@ import { PageHeading } from '../components/PageHeading.tsx'
 import { Pagination } from '../components/Pagination.tsx'
 import { UsersTable } from '../components/UsersTable.tsx'
 import { useUsers } from '../hooks/useUsers.ts'
+import { useSearchInput } from '../hooks/useSearchInput.ts'
 import { useUsersFilters } from '../hooks/useUsersFilters.ts'
 import { PER_PAGE_OPTIONS } from '../lib/userFilters.ts'
 
 export function UsersListPage() {
   const { filters, setFilters, toggleSort } = useUsersFilters()
-  const { data, isPending, isError, error, isPlaceholderData } = useUsers(filters)
+  const { inputValue, setInputValue } = useSearchInput({
+    value: filters.search,
+    onDebouncedChange: (search) => {
+      setFilters({ search })
+    },
+  })
+  const { data, isPending, isError, error, isPlaceholderData, isFetching } = useUsers(filters)
 
   return (
     <>
@@ -36,10 +43,10 @@ export function UsersListPage() {
           <input
             id="busca"
             type="search"
-            value={filters.search}
+            value={inputValue}
             placeholder="ex.: souza"
             onChange={(event) => {
-              setFilters({ search: event.target.value })
+              setInputValue(event.target.value)
             }}
           />
         </div>
@@ -62,7 +69,11 @@ export function UsersListPage() {
         </div>
       </form>
 
-      {isPending && <p>Carregando usuários…</p>}
+      {/* `aria-busy` informa o carregamento a quem usa leitor de tela sem
+          remover a tabela anterior da tela. */}
+      <div aria-busy={isFetching} aria-live="polite">
+        {isPending && <p>Carregando usuários…</p>}
+      </div>
 
       {isError && (
         <p role="alert" className="error">
