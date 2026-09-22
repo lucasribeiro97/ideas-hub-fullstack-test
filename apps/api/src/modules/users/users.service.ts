@@ -1,9 +1,16 @@
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { Database } from '../../db/client.js'
 import { firstOrThrow } from '../../lib/rows.js'
 import { UserNotFoundError } from '../../lib/errors.js'
 import { users } from '../../db/schema.js'
-import { toUserResponse, type CreateUserInput, type UserResponse } from './users.schemas.js'
+import {
+  toUserResponse,
+  type CreateUserInput,
+  type ListUsersQuery,
+  type ListUsersResponse,
+  type UserResponse,
+} from './users.schemas.js'
+import { buildOrderBy, buildSearchCondition } from './users.query.js'
 
 /**
  * Cria um usuário.
@@ -36,4 +43,42 @@ export async function getUserById(db: Database, id: string): Promise<UserRespons
   if (!found) throw new UserNotFoundError()
 
   return toUserResponse(found)
+}
+
+/**
+ * Lista usuários com busca parcial, ordenação e paginação (SPEC §6).
+ *
+ * A contagem roda em consulta separada, com o mesmo filtro da listagem. É o
+ * custo de oferecer `total` e `totalPages`, que a interface precisa para
+ * numerar páginas — trade-off registrado na SPEC §6 e limitado por `perPage`
+ * máximo de 100.
+ */
+export async function listUsers(db: Database, query: ListUsersQuery): Promise<ListUsersResponse> {
+  const where = buildSearchCondition(query.search)
+  const offset = (query.page - 1) * query.perPage
+
+  const [rows, totals] = await Promise.all([
+    db
+      .select()
+      .from(users)
+      .where(where)
+      .orderBy(...buildOrderBy(query.sort, query.order))
+      .limit(query.perPage)
+      .offset(offset),
+    db.select({ total: sql<number>`count(*)::int` }).from(users).where(where),
+  ])
+
+  // `count(*)` sempre devolve exatamente uma linha; retorno vazio aqui seria
+  // defeito interno, não lista sem resultados.
+  const total = firstOrThrow(totals, 'count não retornou linha').total
+
+  return {
+    data: rows.map(toUserResponse),
+    meta: {
+      page: query.page,
+      perPage: query.perPage,
+      total,
+      totalPages: Math.ceil(total / query.perPage),
+    },
+  }
 }

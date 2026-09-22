@@ -1,9 +1,11 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import type { Database } from '../../db/client.js'
-import { createUser, getUserById } from './users.service.js'
+import { createUser, getUserById, listUsers } from './users.service.js'
 import {
   createUserBodySchema,
+  listUsersQuerySchema,
+  listUsersResponseSchema,
   userIdParamSchema,
   userResponseSchema,
 } from './users.schemas.js'
@@ -34,6 +36,19 @@ export function usersRoutes(db: Database): FastifyPluginAsync {
 
         return reply.status(201).send(created)
       },
+    )
+
+    route.get(
+      '/users',
+      {
+        schema: {
+          tags: ['users'],
+          summary: 'Lista e pesquisa usuários',
+          querystring: listUsersQuerySchema,
+          response: { 200: listUsersResponseSchema },
+        },
+      },
+      async (request) => listUsers(db, request.query),
     )
 
     route.get(

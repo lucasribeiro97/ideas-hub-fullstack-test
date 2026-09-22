@@ -53,6 +53,37 @@ export const userIdParamSchema = z.object({
   id: z.uuid('id deve ser um UUID'),
 })
 
+/** Campos por onde a listagem pode ser ordenada (SPEC §6). */
+export const SORTABLE_FIELDS = ['name', 'email', 'createdAt'] as const
+
+const MAX_PER_PAGE = 100
+
+export const listUsersQuerySchema = z.object({
+  // `search` ausente e `search` vazio significam a mesma coisa: sem filtro.
+  // Sem isso, limpar o campo de busca na interface enviaria search='' e a
+  // consulta filtraria por string vazia.
+  search: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => (value === '' ? undefined : value)),
+
+  page: z.coerce.number('page deve ser um número').int().min(1, 'page deve ser no mínimo 1').default(1),
+
+  perPage: z.coerce
+    .number('perPage deve ser um número')
+    .int()
+    .min(1, 'perPage deve ser no mínimo 1')
+    .max(MAX_PER_PAGE, `perPage deve ser no máximo ${MAX_PER_PAGE}`)
+    .default(20),
+
+  sort: z.enum(SORTABLE_FIELDS, `sort deve ser um de: ${SORTABLE_FIELDS.join(', ')}`).default('createdAt'),
+
+  order: z.enum(['asc', 'desc'], 'order deve ser asc ou desc').default('desc'),
+})
+
+export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>
+
 export const userResponseSchema = z.object({
   id: z.uuid(),
   name: z.string(),
@@ -63,6 +94,18 @@ export const userResponseSchema = z.object({
 })
 
 export type UserResponse = z.infer<typeof userResponseSchema>
+
+export const listUsersResponseSchema = z.object({
+  data: z.array(userResponseSchema),
+  meta: z.object({
+    page: z.number().int(),
+    perPage: z.number().int(),
+    total: z.number().int(),
+    totalPages: z.number().int(),
+  }),
+})
+
+export type ListUsersResponse = z.infer<typeof listUsersResponseSchema>
 
 /**
  * Converte a linha do banco para o contrato público.
