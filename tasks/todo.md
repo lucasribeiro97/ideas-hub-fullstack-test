@@ -207,11 +207,11 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S3 · **Commit:** `43fa84a`
 
 ### TASK-IMPORT-02 — Carga para tabela de staging via `COPY`
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** staging sem constraints recebendo os registros válidos por `COPY`,
   incluindo o número de linha.
 - **Verificação:** contagem na staging bate com o número de registros válidos lidos.
-- **Critérios:** S2 · **Commit:** —
+- **Critérios:** S2 · **Commit:** `cba066d`
 
 ### TASK-IMPORT-03 — Deduplicação determinística
 - **Estado:** ⬜
