@@ -428,7 +428,10 @@ requisito atualiza a SPEC ou o plano primeiro.
   API, migration, `npm start` respondendo `/health`, `/users` e `/docs` com log em JSON,
   e build do frontend com a URL de produção embutida e `localhost` ausente. A chave da
   WeatherAPI foi conferida ausente da resposta de `/weather/:city`.
-  **Falta a publicação em si**, que depende de conta na plataforma.
+  **Publicado:** blueprint `ideas-hub` criado, três recursos provisionados, migrations
+  aplicadas no Postgres hospedado. Falta apenas a `WEATHER_API_KEY`, que é credencial e
+  precisa ser preenchida por quem é dono da conta. Quatro restrições da plataforma que
+  nenhum ensaio local revelaria estão documentadas no README.
 - **Critérios:** — · **Commit:** `592c633`
 - **Nota:** diferencial opcional do enunciado ("deploy de demonstração"), que declara
   explicitamente não ser necessário publicar. O plano gratuito do Render hiberna o

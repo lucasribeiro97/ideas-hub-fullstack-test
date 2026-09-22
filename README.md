@@ -560,6 +560,26 @@ ordenação e paginação. **O volume completo não cabe no plano gratuito:** o 
 com 220.873 usuários ocupa 179 MB, dos quais **120 MB são os índices GIN de trigrama** —
 contra 0,5 GB de limite, é folga pequena demais para uma demonstração.
 
+### Quatro coisas que só a plataforma revelou
+
+Os quatro comandos foram ensaiados localmente antes de publicar, e mesmo assim:
+
+1. **`preDeployCommand` não existe no plano gratuito.** O blueprint foi recusado na
+   validação com "pre-deploy command is not supported for free tier services". As
+   migrations passaram para o `startCommand`, encadeadas com `&&` — o servidor continua
+   não subindo com o schema desatualizado.
+2. **`NODE_ENV=production` faz o `npm ci` pular as `devDependencies`.** A variável que a
+   aplicação precisa quebra o próprio build: 99 pacotes instalados em vez de 454, e o
+   deploy falha com `TS7016: Could not find a declaration file for module
+   'pg-copy-streams'`. Resolvido com `--include=dev` no comando e `NPM_CONFIG_INCLUDE=dev`
+   na variável de ambiente.
+3. **O Render não atualiza o comando de build de um serviço já criado.** O campo fica
+   bloqueado por ser gerenciado pelo blueprint e mantém o valor do momento da criação;
+   dois syncs não mudaram nada. É por isso que a correção acima precisa existir também
+   como variável de ambiente, que continua editável.
+4. **Sem conectar o provedor Git, nada é automático.** Usando a URL do repositório
+   público, cada atualização exige sync manual do blueprint e deploy manual do serviço.
+
 ### O que esperar do plano gratuito
 
 - **O serviço hiberna após inatividade.** O primeiro acesso de quem for avaliar leva
