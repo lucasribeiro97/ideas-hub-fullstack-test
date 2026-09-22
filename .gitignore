@@ -1,0 +1,33 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Variáveis de ambiente (nunca versionar — use .env.example)
+.env
+.env.*
+!.env.example
+
+# Testes e cobertura
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Dados de importação (CSV baixado, volumes do Postgres)
+data/
+*.csv
+*.csv.gz
+
+# Editor / SO
+.DS_Store
+.idea/
+*.swp
+.vscode/*
+!.vscode/extensions.json
