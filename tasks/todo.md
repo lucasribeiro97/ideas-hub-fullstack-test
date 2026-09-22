@@ -173,6 +173,12 @@ requisito atualiza a SPEC ou o plano primeiro.
   expiração após o TTL e resposta `stale` quando a origem falha.
 - **Critérios:** S9 · **Commit:** `958a3ed`
 
+> **Ordem invertida com a TASK-WEATHER-04.** O aceite desta tarefa exige provar que
+> `404`, `504`, `429` e `502` chegam intactos ao cliente HTTP, o que só é verificável
+> através da rota. Testar o mapeamento sem ela verificaria apenas o `httpStatus` das
+> classes de erro, evidência mais fraca do que a tarefa pede. A rota é implementada
+> primeiro; nenhuma das duas sai do escopo.
+
 ### TASK-WEATHER-03 — Tratamento das falhas externas
 - **Estado:** ⬜
 - **Aceite:** mapeamento conforme §6: `404` cidade inexistente, `504` timeout, `429`
