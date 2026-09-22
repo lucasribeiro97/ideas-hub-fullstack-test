@@ -111,7 +111,45 @@ Formato de erro único para toda a API:
 { "error": { "code": "USER_EMAIL_TAKEN", "message": "Já existe um usuário com este email." } }
 ```
 
-Nenhuma resposta de erro expõe stack trace, SQL ou mensagem de driver.
+Erros de validação acrescentam `details`, listando cada campo rejeitado. Sem isso o
+frontend só consegue exibir uma mensagem genérica no topo do formulário, em vez de
+apontar o campo com problema — o que o requisito de "mensagens claras" (§13 S13) pede:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Dados inválidos.",
+    "details": [{ "field": "email", "message": "email inválido" }]
+  }
+}
+```
+
+`details` descreve **a requisição de quem chamou**, não o estado interno do servidor:
+nome de campo e motivo, nunca nome de tabela, SQL ou caminho de arquivo.
+
+### Catálogo de códigos
+
+| Código | HTTP | Quando |
+|---|---:|---|
+| `VALIDATION_ERROR` | 422 | Corpo bem formado, mas semanticamente inválido |
+| `INVALID_PARAM` | 400 | Parâmetro de rota ou de query malformado (ex.: id que não é UUID) |
+| `USER_NOT_FOUND` | 404 | Usuário inexistente |
+| `USER_EMAIL_TAKEN` | 409 | Email já usado por outro usuário |
+| `ROUTE_NOT_FOUND` | 404 | Rota inexistente |
+| `INTERNAL_ERROR` | 500 | Qualquer falha não prevista |
+| `WEATHER_CITY_NOT_FOUND` | 404 | Cidade não encontrada na origem |
+| `WEATHER_TIMEOUT` | 504 | Origem excedeu o tempo limite |
+| `WEATHER_RATE_LIMITED` | 429 | Cota da origem esgotada |
+| `WEATHER_UPSTREAM_ERROR` | 502 | Origem indisponível ou resposta inesperada |
+
+A separação entre `400` e `422` é deliberada: `400` indica requisição malformada no
+endereçamento (rota ou query), `422` indica corpo bem formado que não satisfaz as
+regras. Isso permite ao frontend distinguir "link quebrado" de "formulário a corrigir".
+
+Nenhuma resposta de erro expõe stack trace, SQL ou mensagem de driver. Em `500`, o
+cliente recebe mensagem genérica e o detalhe real vai apenas para o log, correlacionado
+pelo `x-request-id` devolvido no cabeçalho.
 
 ### Usuários
 
