@@ -140,12 +140,12 @@ requisito atualiza a SPEC ou o plano primeiro.
 - **Critérios:** S5 · **Commit:** `761017d`
 
 ### TASK-API-06 — `PATCH /users/:id`
-- **Estado:** ⬜
+- **Estado:** ✅
 - **Aceite:** atualização parcial; `404` para inexistente; `409` ao trocar para email já
   usado por outro usuário; atualizar para o próprio email **não** conflita;
   `updated_at` muda.
 - **Verificação:** testes dos quatro casos, incluindo o de não conflitar consigo mesmo.
-- **Critérios:** S4, S6 · **Commit:** —
+- **Critérios:** S4, S6 · **Commit:** `bcf8bf8`
 
 ### TASK-API-07 — `DELETE /users/:id`
 - **Estado:** ⬜
@@ -391,7 +391,7 @@ Os commits são preenchidos conforme cada tarefa é concluída.
 | S1 Banco e migrations | TASK-INFRA-01, TASK-INFRA-02, TASK-DB-01 | `6449c27`, `4e80b2f` | migration em base vazia + reexecução |
 | S2 Importação reproduzível | TASK-IMPORT-02, TASK-IMPORT-03, TASK-IMPORT-05 | — | dupla execução idêntica |
 | S3 Relatório de import | TASK-IMPORT-01, TASK-IMPORT-04, TASK-IMPORT-05 | — | os números fecham |
-| S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7` | 409 na API, inclusive em caixa diferente |
+| S4 Email duplicado rejeitado | TASK-DB-02, TASK-API-03, TASK-API-06 | `4e80b2f`, `28f5fa7`, `bcf8bf8` | 409 no POST e no PATCH, inclusive em caixa diferente |
 | S5 Filtro, ordenação, paginação | TASK-DB-03, TASK-API-05, TASK-WEB-09 | `4e80b2f`, `761017d` | 22 testes na API; uso espontâneo do GIN só com volume, no M4 |
 | S6 `404` vs `400` | TASK-API-02, TASK-API-04, TASK-API-07 | `968f5b0`, `d20c4f5` (parcial) | provado em rota real no GET; falta DELETE |
 | S7 Falha da API climática | TASK-WEATHER-01, TASK-WEATHER-03, TASK-WEATHER-04 | — | testes com MSW |
